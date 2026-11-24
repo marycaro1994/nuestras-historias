@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nuestros Cuentos Mágicos - Libro Animado 3D</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;700;800&display=swap');
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(135deg, #ff7eb3 0%, #ff758c 25%, #ffcd56 50%, #4bc0c0 75%, #36a2eb 100%);
+    background-size: 400% 400%;
+    animation: gradientBG 15s ease infinite;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    overflow-x: hidden;
+    color: #2d3436;
+  }
+
+  @keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* Top Controls Bar */
+  .top-bar {
+    width: 100%;
+    max-width: 1150px;
+    padding: 12px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(8px);
+    border-radius: 0 0 24px 24px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    z-index: 100;
+  }
+
+  .brand-title {
+    font-family: 'Fredoka', cursive;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #e84393;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .nav-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .pill-btn {
+    border: none;
+    padding: 7px 13px;
+    border-radius: 20px;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    color: white;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+  }
+
+  .pill-btn:hover { transform: translateY(-2px) scale(1.04); }
+  .pill-isa { background: linear-gradient(45deg, #ff6b81, #ff9ff3); }
+  .pill-dylan { background: linear-gradient(45deg, #1e90ff, #00d2d3); }
+  .pill-escuela { background: linear-gradient(45deg, #2ed573, #ffa502); }
+  .pill-julieta { background: linear-gradient(45deg, #a55eea, #f368e0); }
+  .pill-cancion { background: linear-gradient(45deg, #ff4757, #ffbe76); }
+
+  .action-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .btn-action {
+    border: none;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  }
+
+  .btn-voice {
+    background: #6c5ce7;
+    color: white;
+  }
+  .btn-voice.speaking {
+    background: #00b894;
+    animation: pulse 1.2s infinite;
+  }
+
+  .btn-download {
+    background: #ff9f43;
+    color: white;
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.06); }
+    100% { transform: scale(1); }
+  }
+
+  /* 3D Book Container */
+  .stage {
+    flex: 1;
+    width: 100%;
+    max-width: 1050px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    perspective: 2200px;
+  }
+
+  .book-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 960px;
+    height: 560px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .book {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    border-radius: 20px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.35), inset 0 0 15px rgba(0,0,0,0.1);
+    background: #fffdf7;
+    overflow: hidden;
+    transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+
+  /* Spine effect */
+  .book::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 36px;
+    transform: translateX(-50%);
+    background: linear-gradient(90deg, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0.16) 48%, rgba(0,0,0,0.22) 50%, rgba(0,0,0,0.14) 52%, rgba(0,0,0,0.02) 100%);
+    pointer-events: none;
+    z-index: 20;
+  }
+
+  .book.cover-mode::after {
+    display: none;
+  }
+
+  .spread {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    animation: pageTurnIn 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  @keyframes pageTurnIn {
+    0% {
+      opacity: 0.3;
+      transform: rotateY(-14deg) scale(0.97);
+    }
+    100% {
+      opacity: 1;
+      transform: rotateY(0deg) scale(1);
+    }
+  }
+
+  .page {
+    width: 50%;
+    height: 100%;
+    padding: 30px 34px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    background-image: radial-gradient(#e0d8c3 1px, transparent 1px);
+    background-size: 24px 24px;
+    background-color: #fffef9;
+  }
+
+  .page-left {
+    border-right: 1px solid rgba(0,0,0,0.06);
+  }
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .story-badge {
+    padding: 5px 14px;
+    border-radius: 15px;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .page-num {
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 700;
+    color: #b2bec3;
+    font-size: 0.95rem;
+  }
+
+  .story-title {
+    font-family: 'Fredoka', cursive;
+    font-size: 1.9rem;
+    font-weight: 700;
+    margin-bottom: 14px;
+    line-height: 1.15;
+  }
+
+  .verse-box {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.88);
+    border-radius: 20px;
+    padding: 22px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+    border: 3px dashed #ffeaa7;
+  }
+
+  .verse-line {
+    font-size: 1.38rem;
+    font-weight: 800;
+    line-height: 1.45;
+    color: #2d3436;
+    transition: all 0.25s ease;
+    padding: 4px 10px;
+    border-radius: 10px;
+  }
+
+  .verse-line.highlight {
+    background: #ffeaa7;
+    color: #d63031;
+    transform: scale(1.03);
+  }
+
+  .author-card {
+    text-align: center;
+    padding: 24px;
+    border-radius: 24px;
+    background: linear-gradient(135deg, #fff9c4, #ffecb3);
+    border: 4px solid #fbc02d;
+    box-shadow: 0 10px 25px rgba(251, 192, 45, 0.25);
+  }
+
+  .author-card h3 {
+    font-family: 'Fredoka', cursive;
+    font-size: 1.3rem;
+    color: #e65100;
+    margin-bottom: 8px;
+  }
+
+  .author-name {
+    font-family: 'Fredoka', cursive;
+    font-size: 1.85rem;
+    font-weight: 700;
+    color: #6a1b9a;
+  }
+
+  /* Canvas Illustration Frame */
+  .art-frame {
+    width: 100%;
+    height: 100%;
+    border-radius: 22px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.12), 0 8px 20px rgba(0,0,0,0.12);
+    border: 5px solid #ffffff;
+    cursor: pointer;
+  }
+
+  canvas.scene-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .tap-hint {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    background: rgba(255,255,255,0.9);
+    padding: 5px 12px;
+    border-radius: 14px;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #e84393;
+    pointer-events: none;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+  }
+
+  /* Cover & Back Cover */
+  .cover-full {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #ff6b81 0%, #ff9f43 45%, #feca57 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cover-badge {
+    background: rgba(255,255,255,0.25);
+    padding: 8px 20px;
+    border-radius: 25px;
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 16px;
+    backdrop-filter: blur(4px);
+  }
+
+  .cover-title {
+    font-family: 'Fredoka', cursive;
+    font-size: 3.4rem;
+    font-weight: 700;
+    text-shadow: 0 5px 15px rgba(0,0,0,0.22);
+    margin-bottom: 14px;
+    line-height: 1.1;
+  }
+
+  .cover-subtitle {
+    font-size: 1.25rem;
+    font-weight: 700;
+    max-width: 650px;
+    margin-bottom: 28px;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
+
+  .cover-authors {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 30px;
+  }
+
+  .cover-author-chip {
+    background: white;
+    color: #e84393;
+    padding: 7px 16px;
+    border-radius: 20px;
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 700;
+    font-size: 0.92rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+
+  .btn-open-book {
+    background: #2ed573;
+    color: white;
+    border: none;
+    padding: 16px 38px;
+    border-radius: 35px;
+    font-family: 'Fredoka', cursive;
+    font-size: 1.4rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 10px 25px rgba(46, 213, 115, 0.45);
+    transition: all 0.25s ease;
+  }
+
+  .btn-open-book:hover {
+    transform: translateY(-4px) scale(1.05);
+    background: #26de81;
+  }
+
+  /* Video Section */
+  .video-frame-box {
+    width: 100%;
+    flex: 1;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 5px solid #ffd32a;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.18);
+    background: #000;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .video-frame-box iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  .yt-fallback-btn {
+    display: inline-block;
+    margin-top: 10px;
+    background: #ff0000;
+    color: white;
+    text-decoration: none;
+    padding: 9px 18px;
+    border-radius: 18px;
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(255,0,0,0.25);
+  }
+
+  /* Bottom Navigation Controls */
+  .bottom-controls {
+    width: 100%;
+    max-width: 960px;
+    padding: 12px 24px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .nav-arrow {
+    background: white;
+    color: #2d3436;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .nav-arrow:hover:not(:disabled) {
+    transform: translateY(-2px);
+    background: #ffeaa7;
+  }
+
+  .nav-arrow:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .progress-indicator {
+    background: rgba(255,255,255,0.9);
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #e84393;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  }
+
+  @media (max-width: 820px) {
+    .book-wrapper { height: auto; min-height: 680px; }
+    .spread { flex-direction: column; }
+    .page { width: 100%; height: auto; min-height: 330px; padding: 20px; }
+    .book::after { display: none; }
+    .cover-title { font-size: 2.3rem; }
+    .verse-line { font-size: 1.15rem; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Top Navigation & Tools -->
+  <header class="top-bar">
+    <div class="brand-title">🦋 Nuestros Cuentos Mágicos</div>
+    <div class="nav-pills">
+      <button class="pill-btn pill-isa" onclick="goToSpread(1)">🦋 Isa mariposita</button>
+      <button class="pill-btn pill-dylan" onclick="goToSpread(3)">📚 Dylan el parlanchín</button>
+      <button class="pill-btn pill-escuela" onclick="goToSpread(5)">🏫 En mi escuela</button>
+      <button class="pill-btn pill-julieta" onclick="goToSpread(7)">🏰 Julieta y su castillo</button>
+      <button class="pill-btn pill-cancion" onclick="goToSpread(9)">🎵 Mi historia hecha canción</button>
+    </div>
+    <div class="action-group">
+      <button id="btnVoice" class="btn-action btn-voice" onclick="toggleNarration()">🔊 Escuchar cuento</button>
+      <button class="btn-action btn-download" onclick="downloadBook()">💾 Descargar HTML</button>
+    </div>
+  </header>
+
+  <!-- Main 3D Book Stage -->
+  <main class="stage">
+    <div class="book-wrapper">
+      <div id="bookContainer" class="book cover-mode">
+        <!-- Dynamic Spread Rendered Here -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Bottom Page Flip Controls -->
+  <footer class="bottom-controls">
+    <button id="btnPrev" class="nav-arrow" onclick="prevSpread()">⬅️ Página anterior</button>
+    <div id="progressText" class="progress-indicator">Portada del Libro</div>
+    <button id="btnNext" class="nav-arrow" onclick="nextSpread()">Siguiente página ➡️</button>
+  </footer>
+
+<script>
+const spreads = [
+  // 0: Cover
+  {
+    type: 'cover',
+    label: 'Portada del Libro',
+    title: 'Nuestros Cuentos Mágicos',
+    subtitle: 'Una colección animada de poemas e historias llenas de alegría, amistad y amor.',
+    authors: [
+      'Isabella Rizzo Gómez',
+      'Dylan Gutiérrez Miquilena',
+      'Hemac Barraza',
+      'Julieta Castro García'
+    ]
+  },
+  // 1: Isa Mariposita - Part 1
+  {
+    type: 'story',
+    label: 'Isa mariposita • Páginas 1 - 2',
+    badge: 'Cuento 1 • Isa mariposita',
+    color: '#ff6b81',
+    title: 'Isa mariposita',
+    scene: 'isa_garden',
+    verses: [
+      'Isa mariposita',
+      'Es nuestra amiguita',
+      'Al ver su carita',
+      'Nos dibuja una sonrisa.',
+      'Todos los días nos demuestra',
+      'que la vida se vive mejor',
+      'con alegría y con amor.'
+    ]
+  },
+  // 2: Isa Mariposita - Part 2 & Author
+  {
+    type: 'story_author',
+    label: 'Isa mariposita • Páginas 3 - 4',
+    badge: 'Cuento 1 • Isa mariposita',
+    color: '#ff6b81',
+    title: '¡Baila con alegría!',
+    scene: 'isa_dance',
+    verses: [
+      'Isa mariposita',
+      'Es nuestra amiguita',
+      'La que pinta cada día',
+      'Brinca y baila con alegría.'
+    ],
+    authorRole: 'Autora de la historia',
+    authorName: 'Isabella Rizzo Gómez'
+  },
+  // 3: Dylan el parlanchín - Part 1
+  {
+    type: 'story',
+    label: 'Dylan el parlanchín • Páginas 5 - 6',
+    badge: 'Cuento 2 • Dylan el parlanchín',
+    color: '#1e90ff',
+    title: 'Dylan el parlanchín',
+    scene: 'dylan_school',
+    verses: [
+      'Dylan el parlanchín',
+      'Lee, canta y multiplica.',
+      'En la escuela de la vida',
+      'Se prepara día a día.',
+      'Unas veces se distrae',
+      'Y no termina la lección',
+      'Pero enseguida recuerda',
+      'que estudiar es su misión.'
+    ]
+  },
+  // 4: Dylan el parlanchín - Part 2 & Author
+  {
+    type: 'story_author',
+    label: 'Dylan el parlanchín • Páginas 7 - 8',
+    badge: 'Cuento 2 • Dylan el parlanchín',
+    color: '#1e90ff',
+    title: 'Con dulzura y amor',
+    scene: 'dylan_love',
+    verses: [
+      'Su mamá y su maestra',
+      'Con dulzura le enseñan',
+      'Y con amor le recuerdan.'
+    ],
+    authorRole: 'Autor de la historia',
+    authorName: 'Dylan Gutiérrez Miquilena'
+  },
+  // 5: En mi escuela - Part 1
+  {
+    type: 'story',
+    label: 'En mi escuela • Páginas 9 - 10',
+    badge: 'Cuento 3 • En mi escuela',
+    color: '#2ed573',
+    title: 'En mi escuela',
+    scene: 'escuela_amigos',
+    verses: [
+      'En mi escuela',
+      'Tengo dos amigos',
+      'Jarlan y Santiago',
+      'Quienes juegan conmigo.',
+      'Cuando alguno llega triste',
+      'Yo lo hago feliz',
+      'Y con un abrazo',
+      'Vuelve a sonreír.'
+    ]
+  },
+  // 6: En mi escuela - Part 2 & Author
+  {
+    type: 'story_author',
+    label: 'En mi escuela • Páginas 11 - 12',
+    badge: 'Cuento 3 • En mi escuela',
+    color: '#2ed573',
+    title: 'Con la seño Mary',
+    scene: 'escuela_baile',
+    verses: [
+      'Nos gusta cantar',
+      'Pero también bailar',
+      'Y con la seño Mary',
+      'Todos vamos a estudiar.'
+    ],
+    authorRole: 'Autor de la historia',
+    authorName: 'Hemac Barraza'
+  },
+  // 7: Julieta y su castillo real - Part 1
+  {
+    type: 'story',
+    label: 'Julieta y su castillo real • Páginas 13 - 14',
+    badge: 'Cuento 4 • Julieta y su castillo real',
+    color: '#a55eea',
+    title: 'Julieta y su castillo real',
+    scene: 'julieta_castillo',
+    verses: [
+      'Vivo en un castillo',
+      'Que tiene mucho oro',
+      'El amor de mis papitos',
+      'Son un verdadero tesoro.',
+      'Mi hermano y mi mamá',
+      'Antes de irme a la escuela',
+      'Me dicen qué bella',
+      'Es nuestra niña Julieta.'
+    ]
+  },
+  // 8: Julieta y su castillo real - Part 2 & Author
+  {
+    type: 'story_author',
+    label: 'Julieta y su castillo real • Páginas 15 - 16',
+    badge: 'Cuento 4 • Julieta y su castillo real',
+    color: '#a55eea',
+    title: 'Un amor gigante',
+    scene: 'julieta_familia',
+    verses: [
+      'Mi papito me ama',
+      'Y yo lo amo a él',
+      'Me abraza y me cuida',
+      'Y yo cuido de él.'
+    ],
+    authorRole: 'Autora de la historia',
+    authorName: 'Julieta Castro García'
+  },
+  // 9: Mi historia hecha canción (YouTube Video)
+  {
+    type: 'video',
+    label: 'Mi historia hecha canción • Páginas 17 - 18',
+    badge: '🎵 Sección Musical',
+    color: '#ff4757',
+    title: 'Mi historia hecha canción',
+    videoId: 'y9SXjlXnwZk',
+    scene: 'musical_fiesta'
+  },
+  // 10: Back Cover
+  {
+    type: 'back_cover',
+    label: 'Contraportada • Fin del Libro',
+    title: '¡Colorín colorado!',
+    subtitle: 'Gracias por leer, cantar y soñar con las historias de nuestros pequeños grandes escritores.'
+  }
+];
+
+let currentSpread = 0;
+let animFrameId = null;
+let particles = [];
+let isSpeaking = false;
+
+// Audio flip effect using Web Audio API
+function playPageFlipSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const bufferSize = ctx.sampleRate * 0.18;
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ctx.sampleRate * 0.05));
+    }
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.setValueAtTime(1200, ctx.currentTime);
+    filter.Q.setValueAtTime(1.5, ctx.currentTime);
+
+    noise.connect(filter);
+    filter.connect(ctx.destination);
+    noise.start();
+  } catch (e) {}
+}
+
+function stopNarration() {
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+  }
+  isSpeaking = false;
+  const btn = document.getElementById('btnVoice');
+  btn.classList.remove('speaking');
+  btn.innerHTML = '🔊 Escuchar cuento';
+  document.querySelectorAll('.verse-line').forEach(el => el.classList.remove('highlight'));
+}
+
+function toggleNarration() {
+  if (isSpeaking) {
+    stopNarration();
+    return;
+  }
+  const s = spreads[currentSpread];
+  let textToRead = '';
+  if (s.type === 'cover' || s.type === 'back_cover') {
+    textToRead = s.title + '. ' + s.subtitle;
+  } else if (s.type === 'video') {
+    textToRead = 'Mi historia hecha canción. Dale clic al video para disfrutar nuestra música.';
+  } else {
+    textToRead = s.title + '. ' + s.verses.join(' ');
+    if (s.authorName) {
+      textToRead += '. ' + s.authorRole + ': ' + s.authorName;
+    }
+  }
+
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(textToRead);
+    utterance.lang = 'es-ES';
+    utterance.rate = 0.92;
+    utterance.pitch = 1.12;
+
+    const lines = document.querySelectorAll('.verse-line');
+    let lineIdx = 0;
+
+    utterance.onstart = () => {
+      isSpeaking = true;
+      const btn = document.getElementById('btnVoice');
+      btn.classList.add('speaking');
+      btn.innerHTML = '⏹️ Detener voz';
+      if (lines.length > 0) lines[0].classList.add('highlight');
+    };
+
+    utterance.onboundary = () => {
+      if (lines.length > 0) {
+        lines.forEach(l => l.classList.remove('highlight'));
+        lines[lineIdx % lines.length].classList.add('highlight');
+        lineIdx++;
+      }
+    };
+
+    utterance.onend = () => {
+      stopNarration();
+    };
+
+    window.speechSynthesis.speak(utterance);
+  }
+}
+
+function goToSpread(index) {
+  if (index < 0 || index >= spreads.length) return;
+  stopNarration();
+  playPageFlipSound();
+  currentSpread = index;
+  renderSpread();
+}
+
+function nextSpread() {
+  if (currentSpread < spreads.length - 1) goToSpread(currentSpread + 1);
+}
+
+function prevSpread() {
+  if (currentSpread > 0) goToSpread(currentSpread - 1);
+}
+
+function renderSpread() {
+  const book = document.getElementById('bookContainer');
+  const s = spreads[currentSpread];
+  document.getElementById('progressText').textContent = s.label;
+  document.getElementById('btnPrev').disabled = currentSpread === 0;
+  document.getElementById('btnNext').disabled = currentSpread === spreads.length - 1;
+
+  if (animFrameId) {
+    cancelAnimationFrame(animFrameId);
+    animFrameId = null;
+  }
+
+  if (s.type === 'cover') {
+    book.classList.add('cover-mode');
+    book.innerHTML = `
+      <div class="cover-full">
+        <div class="cover-badge">✨ Colección Infantil Interactiva • 6 Años ✨</div>
+        <h1 class="cover-title">🦋 ${s.title} 🏰</h1>
+        <p class="cover-subtitle">${s.subtitle}</p>
+        <div class="cover-authors">
+          ${s.authors.map(a => `<span class="cover-author-chip">✍️ ${a}</span>`).join('')}
+        </div>
+        <button class="btn-open-book" onclick="nextSpread()">📖 Abrir el libro animado</button>
+      </div>
+    `;
+    return;
+  }
+
+  if (s.type === 'back_cover') {
+    book.classList.add('cover-mode');
+    book.innerHTML = `
+      <div class="cover-full" style="background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 50%, #fd79a8 100%);">
+        <div class="cover-badge">🌟 Fin del Cuento Animado 🌟</div>
+        <h1 class="cover-title">${s.title}</h1>
+        <p class="cover-subtitle">${s.subtitle}</p>
+        <div style="display:flex; gap:15px; flex-wrap:wrap; justify-content:center;">
+          <button class="btn-open-book" onclick="goToSpread(0)">🔄 Volver a leer desde el inicio</button>
+          <button class="btn-open-book" style="background:#ff9f43;" onclick="downloadBook()">💾 Descargar Libro HTML</button>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  book.classList.remove('cover-mode');
+
+  if (s.type === 'video') {
+    book.innerHTML = `
+      <div class="spread">
+        <div class="page page-left">
+          <div class="page-header">
+            <span class="story-badge" style="background:${s.color}">${s.badge}</span>
+            <span class="page-num">Pág. 17</span>
+          </div>
+          <h2 class="story-title" style="color:${s.color}">🎵 ${s.title}</h2>
+          <div class="video-frame-box">
+            <iframe src="https://www.youtube.com/embed/${s.videoId}?rel=0"
+                    title="Mi historia hecha canción"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen></iframe>
+          </div>
+          <a class="yt-fallback-btn" href="https://youtu.be/${s.videoId}" target="_blank" rel="noopener noreferrer">
+            📺 Abrir video directamente en YouTube
+          </a>
+        </div>
+        <div class="page">
+          <div class="page-header">
+            <span class="story-badge" style="background:#ffa502">🎶 ¡A cantar y bailar!</span>
+            <span class="page-num">Pág. 18</span>
+          </div>
+          <div class="art-frame" onclick="spawnMagicBurst(event)">
+            <canvas id="sceneCanvas" class="scene-canvas"></canvas>
+            <div class="tap-hint">✨ ¡Toca para lanzar notas musicales!</div>
+          </div>
+        </div>
+      </div>
+    `;
+    initCanvasAnimation(s.scene);
+    return;
+  }
+
+  const leftVersesHtml = s.verses.map(v => `<div class="verse-line">${v}</div>`).join('');
+  const pageLeftNum = currentSpread * 2 - 1;
+  const pageRightNum = currentSpread * 2;
+
+  let rightContentHtml = '';
+  if (s.type === 'story_author') {
+    rightContentHtml = `
+      <div style="display:flex; flex-direction:column; gap:16px; height:100%;">
+        <div class="art-frame" style="flex:1;" onclick="spawnMagicBurst(event)">
+          <canvas id="sceneCanvas" class="scene-canvas"></canvas>
+          <div class="tap-hint">✨ ¡Toca el dibujo mágico!</div>
+        </div>
+        <div class="author-card">
+          <h3>🌟 ${s.authorRole} 🌟</h3>
+          <div class="author-name">✍️ ${s.authorName}</div>
+        </div>
+      </div>
+    `;
+  } else {
+    rightContentHtml = `
+      <div class="art-frame" onclick="spawnMagicBurst(event)">
+        <canvas id="sceneCanvas" class="scene-canvas"></canvas>
+        <div class="tap-hint">✨ ¡Toca para magia de colores!</div>
+      </div>
+    `;
+  }
+
+  book.innerHTML = `
+    <div class="spread">
+      <div class="page page-left">
+        <div class="page-header">
+          <span class="story-badge" style="background:${s.color}">${s.badge}</span>
+          <span class="page-num">Pág. ${pageLeftNum}</span>
+        </div>
+        <h2 class="story-title" style="color:${s.color}">${s.title}</h2>
+        <div class="verse-box">
+          ${leftVersesHtml}
+        </div>
+      </div>
+      <div class="page">
+        <div class="page-header">
+          <span class="story-badge" style="background:${s.color}">🎨 Ilustración Animada</span>
+          <span class="page-num">Pág. ${pageRightNum}</span>
+        </div>
+        ${rightContentHtml}
+      </div>
+    </div>
+  `;
+
+  initCanvasAnimation(s.scene);
+}
+
+// Interactive Canvas Animations for each story
+function spawnMagicBurst(e) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  const colors = ['#ff6b81', '#feca57', '#1dd1a1', '#54a0ff', '#ff9ff3', '#ff9f43'];
+  for (let i = 0; i < 18; i++) {
+    const angle = (Math.PI * 2 * i) / 18;
+    const speed = 2 + Math.random() * 4;
+    particles.push({
+      x, y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      size: 6 + Math.random() * 7,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      life: 1.0
+    });
+  }
+}
+
+function drawButterfly(ctx, x, y, scale, wingColor, bodyColor, t, phase) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(scale, scale);
+  const flap = Math.sin(t * 7 + phase) * 0.35 + 0.75;
+
+  // Wings (inspired by children's hand-drawn rounded wings & curly antennae)
+  ctx.fillStyle = wingColor;
+  ctx.strokeStyle = '#4a4a4a';
+  ctx.lineWidth = 2.5;
+
+  // Left wings
+  ctx.save();
+  ctx.scale(flap, 1);
+  ctx.beginPath();
+  ctx.ellipse(-26, -12, 26, 20, -0.3, 0, Math.PI * 2);
+  ctx.fill(); ctx.stroke();
+  ctx.beginPath();
+  ctx.ellipse(-22, 16, 20, 16, 0.3, 0, Math.PI * 2);
+  ctx.fill(); ctx.stroke();
+  ctx.restore();
+
+  // Right wings
+  ctx.save();
+  ctx.scale(flap, 1);
+  ctx.beginPath();
+  ctx.ellipse(26, -12, 26, 20, 0.3, 0, Math.PI * 2);
+  ctx.fill(); ctx.stroke();
+  ctx.beginPath();
+  ctx.ellipse(22, 16, 20, 16, -0.3, 0, Math.PI * 2);
+  ctx.fill(); ctx.stroke();
+  ctx.restore();
+
+  // Body
+  ctx.fillStyle = bodyColor;
+  ctx.beginPath();
+  ctx.ellipse(0, 8, 8, 22, 0, 0, Math.PI * 2);
+  ctx.fill(); ctx.stroke();
+
+  // Head
+  ctx.fillStyle = '#ffeaa7';
+  ctx.beginPath();
+  ctx.arc(0, -18, 13, 0, Math.PI * 2);
+  ctx.fill(); ctx.stroke();
+
+  // Curly antennae (from students' drawing)
+  ctx.beginPath();
+  ctx.moveTo(-5, -30);
+  ctx.bezierCurveTo(-12, -48, -22, -42, -14, -35);
+  ctx.moveTo(5, -30);
+  ctx.bezierCurveTo(12, -48, 22, -42, 14, -35);
+  ctx.stroke();
+
+  // Happy eyes & smile
+  ctx.fillStyle = '#2d3436';
+  ctx.beginPath();
+  ctx.arc(-4, -20, 2.2, 0, Math.PI * 2);
+  ctx.arc(4, -20, 2.2, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(0, -15, 5, 0.1 * Math.PI, 0.9 * Math.PI);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+function drawFlower(ctx, x, y, petalColor, t, phase) {
+  ctx.save();
+  ctx.translate(x, y);
+  const sway = Math.sin(t * 2.5 + phase) * 0.08;
+  ctx.rotate(sway);
+
+  // Stem
+  ctx.strokeStyle = '#2ed573';
+  ctx.lineWidth = 5;
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(0, 65);
+  ctx.stroke();
+
+  // Petals
+  ctx.fillStyle = petalColor;
+  ctx.strokeStyle = '#4a4a4a';
+  ctx.lineWidth = 2;
+  for (let i = 0; i < 8; i++) {
+    ctx.save();
+    ctx.rotate((Math.PI * 2 * i) / 8);
+    ctx.beginPath();
+    ctx.ellipse(0, -16, 8, 12, 0, 0, Math.PI * 2);
+    ctx.fill(); ctx.stroke();
+    ctx.restore();
+  }
+
+  // Center
+  ctx.fillStyle = '#ffd32a';
+  ctx.beginPath();
+  ctx.arc(0, 0, 11, 0, Math.PI * 2);
+  ctx.fill(); ctx.stroke();
+
+  ctx.restore();
+}
+
+function initCanvasAnimation(scene) {
+  const canvas = document.getElementById('sceneCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  particles = [];
+
+  function resize() {
+    const rect = canvas.parentElement.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+  }
+  resize();
+
+  let startTime = performance.now();
+
+  function render(now) {
+    const t = (now - startTime) / 1000;
+    const w = canvas.width;
+    const h = canvas.height;
+
+    ctx.clearRect(0, 0, w, h);
+
+    if (scene === 'isa_garden' || scene === 'isa_dance') {
+      // Bright sunny sky & green meadow
+      const sky = ctx.createLinearGradient(0, 0, 0, h);
+      sky.addColorStop(0, '#70a1ff');
+      sky.addColorStop(0.7, '#dff9fb');
+      sky.addColorStop(1, '#7bed9f');
+      ctx.fillStyle = sky;
+      ctx.fillRect(0, 0, w, h);
+
+      // Sun
+      ctx.fillStyle = '#ffd32a';
+      ctx.beginPath();
+      ctx.arc(w - 65, 65, 36 + Math.sin(t * 3) * 3, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Meadow
+      ctx.fillStyle = '#2ed573';
+      ctx.beginPath();
+      ctx.ellipse(w / 2, h + 30, w * 0.75, 110, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Hand-drawn style flowers
+      drawFlower(ctx, w * 0.2, h - 75, '#ff9ff3', t, 0);
+      drawFlower(ctx, w * 0.5, h - 85, '#ff6b81', t, 1.5);
+      drawFlower(ctx, w * 0.8, h - 70, '#54a0ff', t, 3);
+
+      // Isa & butterfly friends
+      const bounce = scene === 'isa_dance' ? Math.abs(Math.sin(t * 5)) * 25 : Math.sin(t * 2.5) * 15;
+      drawButterfly(ctx, w * 0.5 + Math.cos(t * 1.5) * 35, h * 0.42 - bounce, 1.25, '#ff9ff3', '#ff6b81', t, 0);
+      drawButterfly(ctx, w * 0.24 + Math.sin(t * 2) * 20, h * 0.28 + Math.cos(t * 2) * 12, 0.75, '#70a1ff', '#1e90ff', t, 1);
+      drawButterfly(ctx, w * 0.76 + Math.cos(t * 1.8) * 20, h * 0.32 + Math.sin(t * 2.2) * 12, 0.8, '#feca57', '#ff9f43', t, 2);
+    } else if (scene === 'dylan_school' || scene === 'dylan_love') {
+      // Classroom & learning magic
+      ctx.fillStyle = '#dff9fb';
+      ctx.fillRect(0, 0, w, h);
+
+      // Chalkboard
+      ctx.fillStyle = '#1e824c';
+      ctx.strokeStyle = '#d35400';
+      ctx.lineWidth = 8;
+      ctx.fillRect(30, 30, w - 60, h * 0.55);
+      ctx.strokeRect(30, 30, w - 60, h * 0.55);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 22px Fredoka, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('2 + 2 = 4   📖   A B C', w / 2, 75);
+      ctx.font = 'bold 18px Nunito, sans-serif';
+      ctx.fillText(scene === 'dylan_love' ? '❤️ ¡Con amor y dulzura! ❤️' : '⭐ ¡Estudiar es mi misión! ⭐', w / 2, 115);
+
+      // Floating numbers & musical notes
+      const symbols = ['1', '2', '3', '🎵', '📖', '⭐', '❤️'];
+      symbols.forEach((sym, i) => {
+        const sx = (w * (i + 1)) / (symbols.length + 1);
+        const sy = h * 0.72 + Math.sin(t * 3 + i) * 18;
+        ctx.font = '28px Fredoka, sans-serif';
+        ctx.fillText(sym, sx, sy);
+      });
+    } else if (scene === 'escuela_amigos' || scene === 'escuela_baile') {
+      // Sunny playground with Jarlan, Santiago & Seño Mary
+      const bg = ctx.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, '#48dbfb');
+      bg.addColorStop(1, '#1dd1a1');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, w, h);
+
+      // Rainbow arc
+      const rColors = ['#ff6b6b', '#feca57', '#1dd1a1', '#54a0ff', '#a55eea'];
+      rColors.forEach((c, idx) => {
+        ctx.strokeStyle = c;
+        ctx.lineWidth = 10;
+        ctx.beginPath();
+        ctx.arc(w / 2, h * 0.85, w * 0.42 - idx * 10, Math.PI, Math.PI * 2);
+        ctx.stroke();
+      });
+
+      // Three happy friend characters jumping
+      const friends = [
+        { name: 'Jarlan', color: '#ff9f43', x: w * 0.25 },
+        { name: 'Hemac', color: '#54a0ff', x: w * 0.5 },
+        { name: 'Santiago', color: '#ff6b81', x: w * 0.75 }
+      ];
+      friends.forEach((f, idx) => {
+        const jump = Math.abs(Math.sin(t * 4 + idx)) * 22;
+        const fy = h * 0.68 - jump;
+        ctx.fillStyle = f.color;
+        ctx.beginPath();
+        ctx.arc(f.x, fy, 24, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#ffeaa7';
+        ctx.beginPath();
+        ctx.arc(f.x, fy - 32, 16, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#2d3436';
+        ctx.font = 'bold 14px Fredoka, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(f.name, f.x, fy + 42);
+      });
+    } else if (scene === 'julieta_castillo' || scene === 'julieta_familia') {
+      // Golden Royal Castle
+      const sky = ctx.createLinearGradient(0, 0, 0, h);
+      sky.addColorStop(0, '#a55eea');
+      sky.addColorStop(1, '#ff9ff3');
+      ctx.fillStyle = sky;
+      ctx.fillRect(0, 0, w, h);
+
+      // Golden Castle Towers
+      ctx.fillStyle = '#ffd32a';
+      ctx.strokeStyle = '#e67e22';
+      ctx.lineWidth = 3;
+      const cx = w / 2;
+      const cy = h * 0.68;
+
+      ctx.fillRect(cx - 75, cy - 80, 150, 110);
+      ctx.strokeRect(cx - 75, cy - 80, 150, 110);
+
+      // Left & Right towers
+      ctx.fillRect(cx - 105, cy - 110, 40, 140);
+      ctx.strokeRect(cx - 105, cy - 110, 40, 140);
+      ctx.fillRect(cx + 65, cy - 110, 40, 140);
+      ctx.strokeRect(cx + 65, cy - 110, 40, 140);
+
+      // Roofs
+      ctx.fillStyle = '#ff6b81';
+      [cx - 85, cx, cx + 85].forEach((rx, i) => {
+        const topY = i === 1 ? cy - 140 : cy - 155;
+        const baseY = i === 1 ? cy - 80 : cy - 110;
+        ctx.beginPath();
+        ctx.moveTo(rx - 28, baseY);
+        ctx.lineTo(rx, topY);
+        ctx.lineTo(rx + 28, baseY);
+        ctx.closePath();
+        ctx.fill(); ctx.stroke();
+      });
+
+      // Floating golden hearts
+      for (let i = 0; i < 6; i++) {
+        const hx = w * 0.2 + i * (w * 0.12);
+        const hy = h * 0.24 + Math.sin(t * 2.5 + i) * 16;
+        ctx.font = '26px sans-serif';
+        ctx.fillText('💛', hx, hy);
+      }
+    } else if (scene === 'musical_fiesta') {
+      // Musical celebration with all characters
+      const bg = ctx.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, '#ff4757');
+      bg.addColorStop(0.5, '#ffa502');
+      bg.addColorStop(1, '#2ed573');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, w, h);
+
+      drawButterfly(ctx, w * 0.5, h * 0.45 + Math.sin(t * 4) * 18, 1.3, '#ff9ff3', '#ff6b81', t, 0);
+
+      const notes = ['🎵', '🎶', '🎸', '🎹', '⭐', '🦋', '💖'];
+      notes.forEach((n, idx) => {
+        const angle = t * 1.4 + (idx * Math.PI * 2) / notes.length;
+        const nx = w / 2 + Math.cos(angle) * (w * 0.32);
+        const ny = h / 2 + Math.sin(angle) * (h * 0.28);
+        ctx.font = '32px sans-serif';
+        ctx.fillText(n, nx - 16, ny + 10);
+      });
+    }
+
+    // Render interactive burst particles
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.life -= 0.025;
+      if (p.life <= 0) {
+        particles.splice(i, 1);
+        continue;
+      }
+      ctx.globalAlpha = p.life;
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+
+    animFrameId = requestAnimationFrame(render);
+  }
+
+  animFrameId = requestAnimationFrame(render);
+}
+
+// Download self-contained HTML file
+function downloadBook() {
+  const fullHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+  const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'Nuestros_Cuentos_Magicos_Animado_3D.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// Keyboard arrow navigation
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight') nextSpread();
+  if (e.key === 'ArrowLeft') prevSpread();
+});
+
+// Initialize on load
+renderSpread();
+</script>
+</body>
+</html>
