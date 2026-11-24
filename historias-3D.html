@@ -1,0 +1,1776 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuestros Cuentos Mágicos - Libro Animado 3D y Canción</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --paper-cream: #fffef9;
+            --spine-shadow: rgba(45, 20, 60, 0.34);
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Fredoka', cursive, sans-serif;
+            background: linear-gradient(125deg, #ff007f 0%, #ff8c00 26%, #ffe600 54%, #00d2d3 80%, #8a2be2 100%);
+            background-size: 200% 200%;
+            animation: rainbowShift 18s ease infinite;
+            min-height: 100vh;
+            margin: 0;
+            overflow-x: hidden;
+            color: #2d1e2f;
+        }
+
+        @keyframes rainbowShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes floatNote {
+            0%, 100% { transform: translateY(0px) rotate(-6deg); }
+            50% { transform: translateY(-8px) rotate(8deg); }
+        }
+
+        .floating-note {
+            animation: floatNote 2.4s ease-in-out infinite;
+        }
+
+        /* Textura de papel brillante y alegre */
+        .paper-texture {
+            background-color: var(--paper-cream);
+            background-image:
+                radial-gradient(rgba(255, 0, 127, 0.06) 1.5px, transparent 0),
+                linear-gradient(90deg, rgba(0,0,0,0.04) 0%, rgba(255,255,255,0) 6%, rgba(255,255,255,0) 94%, rgba(0,0,0,0.05) 100%);
+            background-size: 20px 20px, 100% 100%;
+        }
+
+        /* Escenario 3D */
+        .book-scene {
+            perspective: 2500px;
+            width: 100%;
+            max-width: 1080px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 6px;
+        }
+
+        .book-wrapper {
+            position: relative;
+            width: 100%;
+            height: 580px;
+            transition: transform 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform-style: preserve-3d;
+        }
+
+        @media (min-width: 768px) {
+            .book-wrapper.closed-front {
+                transform: translateX(-25%);
+            }
+            .book-wrapper.closed-back {
+                transform: translateX(25%);
+            }
+        }
+
+        /* Cada hoja física (leaf) tiene anverso (derecha) y reverso (izquierda) */
+        .leaf {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 50%;
+            height: 100%;
+            transform-origin: left center;
+            transform-style: preserve-3d;
+            transition: transform 0.85s cubic-bezier(0.645, 0.045, 0.355, 1);
+            border-radius: 6px 26px 26px 6px;
+            box-shadow: 0 14px 32px rgba(35, 10, 55, 0.25);
+        }
+
+        @media (max-width: 767px) {
+            .book-wrapper {
+                height: 615px;
+                max-width: 455px;
+            }
+            .leaf {
+                width: 100%;
+                border-radius: 12px 24px 24px 12px;
+            }
+        }
+
+        .leaf.flipped {
+            transform: rotateY(-180deg);
+        }
+
+        .page-face {
+            position: absolute;
+            inset: 0;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border: 3px solid #ffd166;
+        }
+
+        .page-front {
+            border-radius: 4px 26px 26px 4px;
+            box-shadow: inset 14px 0 26px -10px var(--spine-shadow), inset -3px 0 6px rgba(0,0,0,0.05);
+        }
+
+        .page-back {
+            transform: rotateY(180deg);
+            border-radius: 26px 4px 4px 26px;
+            box-shadow: inset -14px 0 26px -10px var(--spine-shadow), inset 3px 0 6px rgba(0,0,0,0.05);
+        }
+
+        /* Tapa dura vibrante */
+        .hardcover-front {
+            background: linear-gradient(135deg, #ff007f 0%, #8a2be2 52%, #00b4d8 100%);
+            border: 5px solid #ffe600;
+            box-shadow: inset 16px 0 24px rgba(30, 0, 50, 0.4), 0 18px 36px rgba(0, 0, 0, 0.3);
+        }
+
+        .hardcover-back {
+            background: linear-gradient(135deg, #00b4d8 0%, #8a2be2 52%, #ff007f 100%);
+            border: 5px solid #ffe600;
+            box-shadow: inset -16px 0 24px rgba(30, 0, 50, 0.4), 0 18px 36px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Borde lateral simulando muchas hojas de colores */
+        .page-stack-right {
+            position: absolute;
+            top: 6px;
+            bottom: 6px;
+            right: -9px;
+            width: 11px;
+            background: repeating-linear-gradient(
+                to right,
+                #fffef9 0px,
+                #fffef9 1.5px,
+                #ff9ebb 2.5px,
+                #fffef9 4px,
+                #90e0ef 5.5px
+            );
+            border-radius: 0 10px 10px 0;
+            z-index: -1;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.2);
+        }
+
+        /* Esquina interactiva para pasar página */
+        .corner-curl {
+            position: absolute;
+            bottom: 10px;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ffe600, #ff9e00);
+            border: 2.5px solid #ffffff;
+            color: #3d1c00;
+            font-weight: 800;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: transform 0.2s ease;
+            z-index: 25;
+        }
+        .corner-curl:hover {
+            transform: scale(1.18) rotate(8deg);
+        }
+        .corner-right { right: 12px; }
+        .corner-left { left: 12px; }
+
+        /* Botones estilo juguete 3D */
+        .btn-toy {
+            transition: all 0.16s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 4px 0 rgba(0, 0, 0, 0.22);
+        }
+        .btn-toy:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+        .btn-toy:active:not(:disabled) {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 rgba(0, 0, 0, 0.22);
+        }
+
+        /* Resaltado de versos durante la lectura en voz alta */
+        .verse-line {
+            transition: all 0.28s ease;
+            padding: 2px 10px;
+            border-radius: 12px;
+        }
+        .verse-active {
+            background: linear-gradient(90deg, #ffe600, #ffbe0b);
+            color: #3d1308 !important;
+            transform: scale(1.05);
+            box-shadow: 0 3px 10px rgba(255, 190, 11, 0.45);
+        }
+
+        /* Marco colorido de ilustración */
+        .vivid-canvas-frame {
+            border: 3.5px dashed #ff007f;
+            border-radius: 22px;
+            background: linear-gradient(180deg, #caf0f8 0%, #fff3b0 68%, #b7e4c7 100%);
+            box-shadow: inset 0 4px 14px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Marco dorado para el video musical */
+        .golden-video-frame {
+            border: 4px solid #ffbe0b;
+            border-radius: 22px;
+            background: linear-gradient(135deg, #fff3b0 0%, #ffd166 100%);
+            box-shadow: 0 8px 20px rgba(255, 158, 0, 0.35), inset 0 0 12px rgba(255, 255, 255, 0.8);
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-between p-2 sm:p-3 select-none">
+
+    <!-- Barra Superior: Título, Selector Rápido de Cuentos, Voz y Descarga -->
+    <header class="w-full max-w-6xl bg-white/95 backdrop-blur-md border-4 border-yellow-300 rounded-3xl px-3.5 py-2 shadow-lg flex flex-col gap-2 mb-1.5 z-40">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+            <!-- Logo y Título -->
+            <div class="flex items-center gap-2 cursor-pointer" onclick="goToState(0)">
+                <span class="text-3xl animate-bounce">📚</span>
+                <div>
+                    <h1 class="text-lg sm:text-2xl font-extrabold bg-gradient-to-r from-pink-600 via-purple-600 to-cyan-600 bg-clip-text text-transparent leading-none">
+                        Nuestros Cuentos Mágicos
+                    </h1>
+                    <p class="text-[11px] sm:text-xs font-bold text-orange-600 mt-0.5">
+                        Antología Infantil Animada • 4 Historias y Canción Musical
+                    </p>
+                </div>
+            </div>
+
+            <!-- Botones de Voz, Lectura Automática y Descarga -->
+            <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                <button id="btnSpeak" onclick="toggleSpeakCurrent()" class="btn-toy bg-yellow-400 hover:bg-yellow-300 text-amber-950 font-bold px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-2xl text-xs sm:text-sm flex items-center gap-1.5 cursor-pointer">
+                    <span>🔊 Escuchar página</span>
+                </button>
+
+                <button id="btnAutoRead" onclick="toggleAutoRead()" class="btn-toy bg-purple-100 hover:bg-purple-200 text-purple-900 border-2 border-purple-400 font-bold px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-2xl text-xs sm:text-sm flex items-center gap-1.5 cursor-pointer">
+                    <span id="autoReadIcon">✨</span>
+                    <span id="autoReadText">Auto-lectura: OFF</span>
+                </button>
+
+                <button onclick="downloadBook()" class="btn-toy bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-2xl text-xs sm:text-sm flex items-center gap-1.5 cursor-pointer">
+                    <span>💾 Descargar Libro Animado</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Índice Interactivo Rápido de los 4 Cuentos + Mi Historia Hecha Canción -->
+        <nav class="flex flex-wrap items-center justify-center gap-1.5 pt-1 border-t-2 border-dashed border-pink-200">
+            <button onclick="goToState(0)" class="btn-toy bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold px-2.5 py-1 rounded-xl text-xs cursor-pointer">
+                🏠 Portada
+            </button>
+            <button onclick="goToState(1)" class="btn-toy bg-pink-500 hover:bg-pink-600 text-white font-bold px-2.5 py-1 rounded-xl text-xs cursor-pointer">
+                🦋 1. Isa mariposita
+            </button>
+            <button onclick="goToState(3)" class="btn-toy bg-cyan-500 hover:bg-cyan-600 text-white font-bold px-2.5 py-1 rounded-xl text-xs cursor-pointer">
+                🎶 2. Dylan el parlanchín
+            </button>
+            <button onclick="goToState(5)" class="btn-toy bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-2.5 py-1 rounded-xl text-xs cursor-pointer">
+                🏫 3. En mi escuela
+            </button>
+            <button onclick="goToState(7)" class="btn-toy bg-purple-600 hover:bg-purple-700 text-white font-bold px-2.5 py-1 rounded-xl text-xs cursor-pointer">
+                👑 4. Julieta y su castillo
+            </button>
+            <button onclick="goToState(9)" class="btn-toy bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white font-extrabold px-3 py-1 rounded-xl text-xs cursor-pointer border border-yellow-200">
+                🎵 Mi historia hecha canción
+            </button>
+        </nav>
+    </header>
+
+    <!-- Notificación Flotante -->
+    <div id="toast" class="fixed top-28 left-1/2 -translate-x-1/2 bg-purple-950/95 text-yellow-200 border-2 border-yellow-400 px-5 py-2.5 rounded-2xl text-sm font-bold shadow-2xl opacity-0 pointer-events-none transition-opacity duration-300 z-50 text-center"></div>
+
+    <!-- Escenario Central del Libro 3D -->
+    <main class="w-full flex-1 flex flex-col items-center justify-center my-0.5">
+        <div class="book-scene">
+            <div id="bookWrapper" class="book-wrapper closed-front">
+                <div class="page-stack-right hidden md:block"></div>
+                <!-- Las 10 hojas físicas (20 caras: Portada + 16 páginas de los 4 cuentos + 2 páginas de 'Mi historia hecha canción' + Contraportada) se generan dinámicamente -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Barra Inferior de Navegación -->
+    <footer class="w-full max-w-5xl flex items-center justify-between gap-2 bg-white/95 backdrop-blur-md border-4 border-cyan-300 rounded-3xl px-4 py-2 mt-1 shadow-lg z-40">
+        <button id="btnPrev" onclick="flipPrev()" disabled class="btn-toy bg-orange-500 hover:bg-orange-600 text-white font-bold px-4 sm:px-5 py-2 rounded-2xl text-xs sm:text-sm flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer">
+            <span>⬅️ Anterior</span>
+        </button>
+
+        <div class="flex flex-col items-center text-center">
+            <span id="pageIndicatorLabel" class="text-xs sm:text-sm font-extrabold text-purple-800">
+                Portada • Nuestros Cuentos Mágicos
+            </span>
+            <div class="flex flex-wrap justify-center gap-1.5 mt-1" id="stepDots"></div>
+        </div>
+
+        <button id="btnNext" onclick="flipNext()" class="btn-toy bg-pink-600 hover:bg-pink-700 text-white font-bold px-4 sm:px-5 py-2 rounded-2xl text-xs sm:text-sm flex items-center gap-1.5 cursor-pointer">
+            <span>Abrir Libro ➡️</span>
+        </button>
+    </footer>
+
+    <script>
+        /* ==========================================================================
+           DATOS COMPLETOS DE LOS 4 CUENTOS + SECCIÓN MUSICAL 'MI HISTORIA HECHA CANCIÓN'
+           ==========================================================================
+           Estructura del libro físico:
+           - 10 hojas físicas (leaves 0..9) = 20 caras (faces 0..19)
+           - 11 estados de apertura (states 0..10):
+             * State 0: Portada (Face 0)
+             * State 1: Cuento 1 (Isa) - Estrofa 1 (Face 1) & Estrofa 2 (Face 2)
+             * State 2: Cuento 1 (Isa) - Estrofa 3 (Face 3) & Autora Isabella Rizzo Gómez (Face 4)
+             * State 3: Cuento 2 (Dylan) - Estrofa 1 (Face 5) & Estrofa 2 (Face 6)
+             * State 4: Cuento 2 (Dylan) - Estrofa 3 (Face 7) & Autor Dylan Gutiérrez Miquilena (Face 8)
+             * State 5: Cuento 3 (Escuela) - Estrofa 1 (Face 9) & Estrofa 2 (Face 10)
+             * State 6: Cuento 3 (Escuela) - Estrofa 3 (Face 11) & Autor Hemac Barraza (Face 12)
+             * State 7: Cuento 4 (Julieta) - Estrofa 1 (Face 13) & Estrofa 2 (Face 14)
+             * State 8: Cuento 4 (Julieta) - Estrofa 3 (Face 15) & Autora Julieta Castro García (Face 16)
+             * State 9: SECCIÓN MUSICAL 'Mi historia hecha canción' (Face 17 & Face 18)
+             * State 10: Contraportada Final (Face 19)
+        */
+        const spreadStates = [
+            {
+                stateIndex: 0,
+                label: "Portada • Nuestros Cuentos Mágicos",
+                isVideoPage: false,
+                speechLines: [
+                    "Nuestros Cuentos Mágicos.",
+                    "Una colección llena de color, alegría y amistad para niños.",
+                    "Toca abrir el libro o elige un cuento arriba."
+                ],
+                verseContainerIds: []
+            },
+            {
+                stateIndex: 1,
+                label: "Cuento 1: Isa mariposita (Páginas 1 y 2)",
+                isVideoPage: false,
+                speechLines: [
+                    "Isa mariposita.",
+                    "Isa mariposita, es nuestra amiguita. Al ver su carita, nos dibuja una sonrisa.",
+                    "Todos los días, nos demuestra que la vida se vive mejor con alegría y con amor."
+                ],
+                verseContainerIds: ["verses-1", "verses-2"]
+            },
+            {
+                stateIndex: 2,
+                label: "Cuento 1: Isa mariposita (Páginas 3 y 4)",
+                isVideoPage: false,
+                speechLines: [
+                    "Isa mariposita, es nuestra amiguita. La que pinta cada día, brinca y baila con alegría.",
+                    "Autora de este cuento: Isabella Rizzo Gómez."
+                ],
+                verseContainerIds: ["verses-3", "verses-4"]
+            },
+            {
+                stateIndex: 3,
+                label: "Cuento 2: Dylan el parlanchín (Páginas 5 y 6)",
+                isVideoPage: false,
+                speechLines: [
+                    "Dylan el parlanchín.",
+                    "Dylan el parlanchín, lee, canta y multiplica. En la escuela de la vida, se prepara día a día.",
+                    "Una veces se distrae y no termina la lección, pero enseguida recuerda que estudiar es su misión."
+                ],
+                verseContainerIds: ["verses-5", "verses-6"]
+            },
+            {
+                stateIndex: 4,
+                label: "Cuento 2: Dylan el parlanchín (Páginas 7 y 8)",
+                isVideoPage: false,
+                speechLines: [
+                    "Su mamá y su maestra con dulzura le enseñan y con amor le recuerdan.",
+                    "Autor de este cuento: Dylan Gutiérrez Miquilena."
+                ],
+                verseContainerIds: ["verses-7", "verses-8"]
+            },
+            {
+                stateIndex: 5,
+                label: "Cuento 3: En mi escuela (Páginas 9 y 10)",
+                isVideoPage: false,
+                speechLines: [
+                    "En mi escuela.",
+                    "En mi escuela tengo dos amigos, Jarlan y Santiago, quienes juegan conmigo.",
+                    "Cuando alguno llega triste, yo lo hago feliz, y con un abrazo vuelve a sonreír."
+                ],
+                verseContainerIds: ["verses-9", "verses-10"]
+            },
+            {
+                stateIndex: 6,
+                label: "Cuento 3: En mi escuela (Páginas 11 y 12)",
+                isVideoPage: false,
+                speechLines: [
+                    "Nos gusta cantar, pero también bailar, y con la seño Mary todos vamos a estudiar.",
+                    "Autor de este cuento: Hemac Barraza."
+                ],
+                verseContainerIds: ["verses-11", "verses-12"]
+            },
+            {
+                stateIndex: 7,
+                label: "Cuento 4: Julieta y su castillo real (Páginas 13 y 14)",
+                isVideoPage: false,
+                speechLines: [
+                    "Julieta y su castillo real.",
+                    "Vivo en un castillo que tiene mucho oro. El amor de mis papitos son un verdadero tesoro.",
+                    "Mi hermano y mi mamá, antes de irme a la escuela, me dicen que bella es nuestra niña Julieta."
+                ],
+                verseContainerIds: ["verses-13", "verses-14"]
+            },
+            {
+                stateIndex: 8,
+                label: "Cuento 4: Julieta y su castillo real (Páginas 15 y 16)",
+                isVideoPage: false,
+                speechLines: [
+                    "Mi papito me ama y yo lo amo a él. Me abraza y me cuida, y yo cuido de él.",
+                    "Autora de este cuento: Julieta Castro García."
+                ],
+                verseContainerIds: ["verses-15", "verses-16"]
+            },
+            {
+                stateIndex: 9,
+                label: "🎵 Mi historia hecha canción (Páginas 17 y 18)",
+                isVideoPage: true,
+                speechLines: [
+                    "Mi historia hecha canción.",
+                    "Dale play al video para cantar, bailar y disfrutar de nuestras historias convertidas en música."
+                ],
+                verseContainerIds: ["verses-song"]
+            },
+            {
+                stateIndex: 10,
+                label: "Contraportada • ¡Colorín Colorado!",
+                isVideoPage: false,
+                speechLines: [
+                    "¡Colorín colorado!",
+                    "Estos cuatro hermosos cuentos infantiles y nuestra canción han terminado.",
+                    "Gracias por leer, cantar y soñar."
+                ],
+                verseContainerIds: []
+            }
+        ];
+
+        // Definición de las 16 páginas interiores de los 4 cuentos (faces 1..16)
+        const interiorPages = [
+            // CUENTO 1: ISA MARIPOSITA
+            {
+                pageNum: 1,
+                badge: "🦋 Cuento 1 • Isa mariposita",
+                badgeBg: "bg-pink-500 text-white",
+                boxBg: "bg-pink-50 border-pink-400",
+                canvasId: "canvas-p1",
+                sceneType: "isa_smile",
+                hint: "✨ Toca para lanzar estrellitas ✨",
+                verses: [
+                    { text: "Isa mariposita", color: "text-purple-900" },
+                    { text: "Es nuestra amiguita", color: "text-purple-900" },
+                    { text: "Al ver su carita", color: "text-purple-900" },
+                    { text: "Nos dibuja una sonrisa.", color: "text-pink-600" }
+                ]
+            },
+            {
+                pageNum: 2,
+                badge: "💖 Isa mariposita",
+                badgeBg: "bg-orange-500 text-white",
+                boxBg: "bg-amber-50 border-orange-400",
+                canvasId: "canvas-p2",
+                sceneType: "isa_love",
+                hint: "💖 Toca para lluvia de amor 💖",
+                verses: [
+                    { text: "Todos los días", color: "text-purple-900" },
+                    { text: "nos demuestra que la vida", color: "text-purple-900" },
+                    { text: "se vive mejor", color: "text-orange-600" },
+                    { text: "con alegría y con amor.", color: "text-pink-600" }
+                ]
+            },
+            {
+                pageNum: 3,
+                badge: "🎶 Isa mariposita",
+                badgeBg: "bg-fuchsia-600 text-white",
+                boxBg: "bg-fuchsia-50 border-fuchsia-400",
+                canvasId: "canvas-p3",
+                sceneType: "isa_dance",
+                hint: "🌟 ¡Haz bailar a Isa! 🌟",
+                verses: [
+                    { text: "Isa mariposita", color: "text-purple-900" },
+                    { text: "Es nuestra amiguita", color: "text-purple-900" },
+                    { text: "La que pinta cada día", color: "text-fuchsia-600" },
+                    { text: "Brinca y baila con alegría.", color: "text-orange-600" }
+                ]
+            },
+            {
+                pageNum: 4,
+                badge: "🌟 Autora • Cuento 1",
+                badgeBg: "bg-yellow-400 text-amber-950",
+                boxBg: "bg-gradient-to-br from-pink-100 via-yellow-100 to-purple-100 border-pink-500",
+                canvasId: "canvas-p4",
+                sceneType: "isa_author",
+                hint: "🎉 ¡Aplausos para la autora! 🎉",
+                isAuthor: true,
+                authorRole: "Autora de Isa mariposita:",
+                authorName: "Isabella Rizzo Gómez",
+                authorNote: "Con dibujos llenos de magia y color 🦋✨"
+            },
+
+            // CUENTO 2: DYLAN EL PARLANCHÍN
+            {
+                pageNum: 5,
+                badge: "🎤 Cuento 2 • Dylan el parlanchín",
+                badgeBg: "bg-cyan-600 text-white",
+                boxBg: "bg-cyan-50 border-cyan-400",
+                canvasId: "canvas-p5",
+                sceneType: "dylan_sing",
+                hint: "🎵 Toca para lanzar notas y números 🎵",
+                verses: [
+                    { text: "Dylan el parlanchín", color: "text-cyan-900" },
+                    { text: "Lee, canta y multiplica.", color: "text-cyan-700" },
+                    { text: "En la escuela de la vida", color: "text-cyan-900" },
+                    { text: "Se prepara día a día.", color: "text-orange-600" }
+                ]
+            },
+            {
+                pageNum: 6,
+                badge: "📚 Dylan el parlanchín",
+                badgeBg: "bg-blue-600 text-white",
+                boxBg: "bg-blue-50 border-blue-400",
+                canvasId: "canvas-p6",
+                sceneType: "dylan_study",
+                hint: "⭐ ¡Toca para estrellas de estudio! ⭐",
+                verses: [
+                    { text: "Una veces se distrae", color: "text-blue-950" },
+                    { text: "Y no termina la lección", color: "text-blue-950" },
+                    { text: "Pero enseguida recuerda", color: "text-blue-700" },
+                    { text: "que estudiar es su misión", color: "text-emerald-600" }
+                ]
+            },
+            {
+                pageNum: 7,
+                badge: "💝 Dylan el parlanchín",
+                badgeBg: "bg-teal-600 text-white",
+                boxBg: "bg-teal-50 border-teal-400",
+                canvasId: "canvas-p7",
+                sceneType: "dylan_love",
+                hint: "💖 Toca para corazones dulces 💖",
+                verses: [
+                    { text: "Su mamá y su maestra", color: "text-teal-950" },
+                    { text: "Con dulzura le enseñan", color: "text-pink-600" },
+                    { text: "Y con amor le recuerdan", color: "text-orange-600" }
+                ]
+            },
+            {
+                pageNum: 8,
+                badge: "🌟 Autor • Cuento 2",
+                badgeBg: "bg-yellow-400 text-amber-950",
+                boxBg: "bg-gradient-to-br from-cyan-100 via-yellow-100 to-emerald-100 border-cyan-500",
+                canvasId: "canvas-p8",
+                sceneType: "dylan_author",
+                hint: "🎉 ¡Aplausos para el autor! 🎉",
+                isAuthor: true,
+                authorRole: "Autor de Dylan el parlanchín:",
+                authorName: "Dylan Gutiérrez Miquilena",
+                authorNote: "¡Un gran escritor, cantante y matemático! 🎶🔢"
+            },
+
+            // CUENTO 3: EN MI ESCUELA
+            {
+                pageNum: 9,
+                badge: "🏫 Cuento 3 • En mi escuela",
+                badgeBg: "bg-emerald-600 text-white",
+                boxBg: "bg-emerald-50 border-emerald-400",
+                canvasId: "canvas-p9",
+                sceneType: "school_friends",
+                hint: "🤝 Toca para jugar con los amigos 🤝",
+                verses: [
+                    { text: "En mi escuela", color: "text-emerald-950" },
+                    { text: "Tengo dos amigos", color: "text-emerald-950" },
+                    { text: "Jarlan y Santiago", color: "text-orange-600" },
+                    { text: "Quienes juegan conmigo", color: "text-emerald-700" }
+                ]
+            },
+            {
+                pageNum: 10,
+                badge: "🤗 En mi escuela",
+                badgeBg: "bg-lime-600 text-white",
+                boxBg: "bg-lime-50 border-lime-500",
+                canvasId: "canvas-p10",
+                sceneType: "school_hug",
+                hint: "😊 Toca para repartir sonrisas 😊",
+                verses: [
+                    { text: "Cuando alguno llega triste", color: "text-emerald-950" },
+                    { text: "Yo lo hago feliz", color: "text-pink-600" },
+                    { text: "Y con un abrazo", color: "text-orange-600" },
+                    { text: "Vuelve a sonreír", color: "text-emerald-700" }
+                ]
+            },
+            {
+                pageNum: 11,
+                badge: "💃 En mi escuela",
+                badgeBg: "bg-green-600 text-white",
+                boxBg: "bg-green-50 border-green-400",
+                canvasId: "canvas-p11",
+                sceneType: "school_mary",
+                hint: "🎶 ¡Canta y baila con la seño Mary! 🎶",
+                verses: [
+                    { text: "Nos gusta cantar", color: "text-emerald-950" },
+                    { text: "Pero también bailar", color: "text-purple-700" },
+                    { text: "Y con la seño Mary", color: "text-pink-600" },
+                    { text: "Todos vamos a estudiar", color: "text-emerald-700" }
+                ]
+            },
+            {
+                pageNum: 12,
+                badge: "🌟 Autor • Cuento 3",
+                badgeBg: "bg-yellow-400 text-amber-950",
+                boxBg: "bg-gradient-to-br from-emerald-100 via-yellow-100 to-lime-100 border-emerald-500",
+                canvasId: "canvas-p12",
+                sceneType: "school_author",
+                hint: "🎉 ¡Aplausos para el autor! 🎉",
+                isAuthor: true,
+                authorRole: "Autor de En mi escuela:",
+                authorName: "Hemac Barraza",
+                authorNote: "¡Celebrando la amistad y la alegría de aprender! 🏫🌈"
+            },
+
+            // CUENTO 4: JULIETA Y SU CASTILLO REAL
+            {
+                pageNum: 13,
+                badge: "👑 Cuento 4 • Julieta y su castillo real",
+                badgeBg: "bg-purple-600 text-white",
+                boxBg: "bg-purple-50 border-purple-400",
+                canvasId: "canvas-p13",
+                sceneType: "castle_gold",
+                hint: "✨ Toca para brillo de oro y amor ✨",
+                verses: [
+                    { text: "Vivo en un castillo", color: "text-purple-950" },
+                    { text: "Que tiene mucho oro", color: "text-amber-600" },
+                    { text: "El amor de mis papitos", color: "text-pink-600" },
+                    { text: "Son un verdadero tesoro", color: "text-purple-700" }
+                ]
+            },
+            {
+                pageNum: 14,
+                badge: "👸 Julieta y su castillo real",
+                badgeBg: "bg-violet-600 text-white",
+                boxBg: "bg-violet-50 border-violet-400",
+                canvasId: "canvas-p14",
+                sceneType: "castle_family",
+                hint: "👑 Toca para coronas y estrellas 👑",
+                verses: [
+                    { text: "Mi hermano y mi mamá", color: "text-purple-950" },
+                    { text: "Antes de irme a la escuela", color: "text-purple-950" },
+                    { text: "Me dicen que bella", color: "text-pink-600" },
+                    { text: "Es nuestra niña Julieta", color: "text-violet-700" }
+                ]
+            },
+            {
+                pageNum: 15,
+                badge: "💕 Julieta y su castillo real",
+                badgeBg: "bg-rose-600 text-white",
+                boxBg: "bg-rose-50 border-rose-400",
+                canvasId: "canvas-p15",
+                sceneType: "castle_dad",
+                hint: "💖 Toca para abrazos y corazones 💖",
+                verses: [
+                    { text: "Mi papito me ama", color: "text-rose-950" },
+                    { text: "Y yo lo amo a él", color: "text-pink-600" },
+                    { text: "Me abraza y me cuida", color: "text-purple-700" },
+                    { text: "Y yo cuido de él.", color: "text-rose-600" }
+                ]
+            },
+            {
+                pageNum: 16,
+                badge: "🌟 Autora • Cuento 4",
+                badgeBg: "bg-yellow-400 text-amber-950",
+                boxBg: "bg-gradient-to-br from-purple-100 via-pink-100 to-yellow-100 border-purple-500",
+                canvasId: "canvas-p16",
+                sceneType: "castle_author",
+                hint: "🎉 ¡Aplausos para la autora! 🎉",
+                isAuthor: true,
+                authorRole: "Autora de Julieta y su castillo real:",
+                authorName: "Julieta Castro García",
+                authorNote: "¡Un cuento real lleno de amor en familia! 👑💖"
+            }
+        ];
+
+        let currentState = 0;
+        const maxState = spreadStates.length - 1; // 10
+        let isAutoRead = false;
+        let isSpeaking = false;
+        let highlightTimer = null;
+
+        /* ==========================================================================
+           CONSTRUCCIÓN DINÁMICA DE LAS 10 HOJAS FÍSICAS 3D
+           ========================================================================== */
+        function buildBookDOM() {
+            const wrapper = document.getElementById('bookWrapper');
+            const totalLeaves = 10; // 10 hojas físicas = 20 caras (faces 0..19)
+
+            for (let leafIdx = 0; leafIdx < totalLeaves; leafIdx++) {
+                const leaf = document.createElement('div');
+                leaf.id = `leaf-${leafIdx}`;
+                leaf.className = 'leaf';
+                leaf.style.zIndex = totalLeaves - leafIdx;
+
+                const frontFaceIdx = leafIdx * 2;
+                const frontFace = createFaceElement(frontFaceIdx, 'page-front');
+
+                const backFaceIdx = leafIdx * 2 + 1;
+                const backFace = createFaceElement(backFaceIdx, 'page-back');
+
+                leaf.appendChild(frontFace);
+                leaf.appendChild(backFace);
+                wrapper.appendChild(leaf);
+            }
+
+            // Construir puntos indicadores inferiores
+            const dotsContainer = document.getElementById('stepDots');
+            dotsContainer.innerHTML = '';
+            spreadStates.forEach((st, idx) => {
+                const dot = document.createElement('button');
+                dot.ariaLabel = st.label;
+                dot.onclick = () => goToState(idx);
+                dot.className = 'w-2.5 h-2.5 rounded-full bg-stone-300 cursor-pointer transition-all';
+                dotsContainer.appendChild(dot);
+            });
+        }
+
+        function createFaceElement(faceIdx, sideClass) {
+            const face = document.createElement('div');
+
+            // Face 0: PORTADA
+            if (faceIdx === 0) {
+                face.className = `page-face ${sideClass} hardcover-front text-center text-white`;
+                face.innerHTML = `
+                    <div class="mt-1">
+                        <span class="inline-block bg-yellow-300 text-amber-950 text-xs sm:text-sm font-extrabold px-4 py-1 rounded-full shadow-md">
+                            🌈 Antología Infantil Animada 3D 🌈
+                        </span>
+                        <h2 class="text-3xl sm:text-5xl font-extrabold mt-2 drop-shadow-lg text-yellow-200 tracking-wide">
+                            Nuestros Cuentos Mágicos
+                        </h2>
+                        <p class="text-xs sm:text-base font-bold text-white/95 mt-1">
+                            4 historias llenas de color + nuestra canción
+                        </p>
+                    </div>
+
+                    <div class="w-full h-40 sm:h-48 my-1 vivid-canvas-frame relative overflow-hidden">
+                        <canvas id="canvas-cover" class="w-full h-full cursor-pointer"></canvas>
+                    </div>
+
+                    <div class="bg-white/20 backdrop-blur-xs rounded-2xl p-2 text-xs font-bold text-yellow-100 border border-white/40">
+                        🦋 Isa • 🎶 Dylan • 🏫 Escuela • 👑 Julieta • 🎵 Canción
+                    </div>
+
+                    <div class="my-1 flex justify-center">
+                        <button onclick="flipNext()" class="btn-toy bg-yellow-300 hover:bg-yellow-400 text-amber-950 font-extrabold px-6 py-2.5 rounded-full text-base sm:text-lg flex items-center gap-2 cursor-pointer shadow-xl">
+                            <span>📖 Abrir el libro</span>
+                        </button>
+                    </div>
+                `;
+                return face;
+            }
+
+            // Face 17: PÁGINA IZQUIERDA DE "MI HISTORIA HECHA CANCIÓN" (Reproductor de Video YouTube)
+            if (faceIdx === 17) {
+                face.className = `page-face ${sideClass} paper-texture text-center`;
+                face.innerHTML = `
+                    <div class="flex items-center justify-between text-xs font-extrabold">
+                        <span class="bg-gradient-to-r from-rose-500 to-amber-500 text-white px-3 py-1 rounded-full shadow-xs">
+                            🎵 Sección Musical Especial
+                        </span>
+                        <span class="text-rose-600 font-bold">¡A cantar!</span>
+                    </div>
+
+                    <div class="my-1">
+                        <h2 class="text-xl sm:text-2xl font-extrabold text-rose-600 flex items-center justify-center gap-2">
+                            <span class="floating-note inline-block">🎶</span>
+                            <span>Mi historia hecha canción</span>
+                            <span class="floating-note inline-block" style="animation-delay: 0.6s;">🎵</span>
+                        </h2>
+                        <p class="text-xs text-stone-600 font-bold">
+                            Escucha, canta y baila nuestras aventuras convertidas en música
+                        </p>
+                    </div>
+
+                    <!-- Reproductor de Video YouTube con marco dorado -->
+                    <div class="w-full golden-video-frame p-2 my-1 flex flex-col items-center">
+                        <div class="w-full aspect-video rounded-xl overflow-hidden bg-black shadow-md">
+                            <iframe
+                                id="storySongIframe"
+                                class="w-full h-full"
+                                src="https://www.youtube.com/embed/y9SXjlXnwZk?rel=0"
+                                title="Mi historia hecha canción"
+                                frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                allowfullscreen>
+                            </iframe>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col items-center gap-1 my-0.5">
+                        <a href="https://youtu.be/y9SXjlXnwZk" target="_blank" rel="noopener noreferrer"
+                           class="btn-toy bg-rose-500 hover:bg-rose-600 text-white font-bold px-4 py-1.5 rounded-full text-xs flex items-center gap-1.5 shadow-sm">
+                            <span>📺 Ver video directamente en YouTube</span>
+                        </a>
+                    </div>
+
+                    <div class="flex justify-between items-center text-xs text-stone-500 font-bold pt-0.5 pl-11">
+                        <span>◀ Volver</span>
+                        <span class="bg-rose-100 text-rose-800 px-2.5 py-0.5 rounded-full">Pág. 17</span>
+                    </div>
+                    <button onclick="flipPrev()" class="corner-curl corner-left" title="Página anterior">◀</button>
+                `;
+                return face;
+            }
+
+            // Face 18: PÁGINA DERECHA DE "MI HISTORIA HECHA CANCIÓN" (Escena Animada de Fiesta Musical)
+            if (faceIdx === 18) {
+                face.className = `page-face ${sideClass} paper-texture text-center`;
+                face.innerHTML = `
+                    <div class="flex items-center justify-between text-xs font-extrabold">
+                        <span class="text-purple-700">Nuestros Cuentos</span>
+                        <span class="bg-amber-400 text-amber-950 px-3 py-1 rounded-full shadow-xs">
+                            🎤 ¡Fiesta Musical!
+                        </span>
+                    </div>
+
+                    <div class="w-full h-44 sm:h-52 my-1.5 vivid-canvas-frame relative overflow-hidden">
+                        <canvas id="canvas-song" class="w-full h-full cursor-pointer"></canvas>
+                        <span class="absolute bottom-1.5 left-1/2 -translate-x-1/2 text-[11px] bg-white/90 text-rose-700 px-2.5 py-0.5 rounded-full font-bold shadow-xs pointer-events-none whitespace-nowrap">
+                            🎶 ¡Toca para lanzar notas musicales! 🎶
+                        </span>
+                    </div>
+
+                    <div id="verses-song" class="bg-gradient-to-br from-rose-50 via-yellow-50 to-cyan-50 border-2 border-dashed border-rose-400 rounded-2xl p-3 my-1">
+                        <p class="verse-line text-base sm:text-lg font-extrabold text-rose-600">¡Nuestras historias cobran vida!</p>
+                        <p class="verse-line text-sm sm:text-base font-bold text-purple-900">Cada cuento, cada risa y cada dibujo</p>
+                        <p class="verse-line text-sm sm:text-base font-bold text-amber-700">se transforman en una hermosa canción</p>
+                        <p class="verse-line text-base sm:text-lg font-extrabold text-emerald-600">para cantar juntos con el corazón. 💖</p>
+                    </div>
+
+                    <div class="flex justify-between items-center text-xs text-stone-500 font-bold pt-0.5 pr-11">
+                        <span class="bg-rose-100 text-rose-800 px-2.5 py-0.5 rounded-full">Pág. 18</span>
+                        <span>Cerrar libro ▶</span>
+                    </div>
+                    <button onclick="flipNext()" class="corner-curl corner-right" title="Cerrar libro">▶</button>
+                `;
+                return face;
+            }
+
+            // Face 19: CONTRAPORTADA
+            if (faceIdx === 19) {
+                face.className = `page-face ${sideClass} hardcover-back text-center text-white flex flex-col justify-between items-center`;
+                face.innerHTML = `
+                    <div class="mt-2">
+                        <span class="text-4xl sm:text-5xl">🦋🎶🏫👑🎵</span>
+                        <h2 class="text-2xl sm:text-4xl font-extrabold text-yellow-200 mt-2 drop-shadow-md">
+                            ¡Colorín colorado!
+                        </h2>
+                        <p class="text-sm sm:text-base text-white font-bold mt-1 max-w-xs mx-auto">
+                            Estos cuatro maravillosos cuentos infantiles y nuestra canción han terminado.
+                        </p>
+                    </div>
+
+                    <div class="bg-white/20 backdrop-blur-xs border-2 border-yellow-300 rounded-3xl p-3.5 max-w-xs w-full text-xs sm:text-sm font-bold text-yellow-100 space-y-1">
+                        <p class="text-white uppercase tracking-wider text-xs">Nuestros Pequeños Autores:</p>
+                        <p>🦋 Isabella Rizzo Gómez</p>
+                        <p>🎶 Dylan Gutiérrez Miquilena</p>
+                        <p>🏫 Hemac Barraza</p>
+                        <p>👑 Julieta Castro García</p>
+                        <p class="text-yellow-200 pt-1">🎵 Con el video: Mi historia hecha canción</p>
+                    </div>
+
+                    <div class="mb-2 flex flex-wrap justify-center gap-2">
+                        <button onclick="goToState(9)" class="btn-toy bg-rose-500 hover:bg-rose-600 text-white font-extrabold px-4 py-2 rounded-full text-xs sm:text-sm flex items-center gap-1.5 cursor-pointer shadow-lg">
+                            <span>🎵 Ver Canción</span>
+                        </button>
+                        <button onclick="goToState(0)" class="btn-toy bg-yellow-300 hover:bg-yellow-400 text-amber-950 font-extrabold px-4 py-2 rounded-full text-xs sm:text-sm flex items-center gap-1.5 cursor-pointer shadow-lg">
+                            <span>🔄 Volver al inicio</span>
+                        </button>
+                    </div>
+                `;
+                return face;
+            }
+
+            // Faces 1..16: Páginas interiores de los 4 cuentos
+            const pageData = interiorPages[faceIdx - 1];
+            const isLeftPage = sideClass === 'page-back';
+
+            face.className = `page-face ${sideClass} paper-texture text-center`;
+
+            let stanzaHTML = '';
+            if (pageData.isAuthor) {
+                stanzaHTML = `
+                    <div id="verses-${pageData.pageNum}" class="${pageData.boxBg} border-3 border-dashed rounded-2xl p-3 sm:p-3.5 my-1 shadow-xs">
+                        <p class="verse-line text-xs sm:text-sm font-bold text-purple-800">${pageData.authorRole}</p>
+                        <p class="verse-line text-xl sm:text-2xl font-extrabold text-pink-600 my-0.5">${pageData.authorName}</p>
+                        <p class="verse-line text-xs font-bold text-amber-800">${pageData.authorNote}</p>
+                    </div>
+                `;
+            } else {
+                const linesHTML = pageData.verses
+                    .map(v => `<p class="verse-line text-base sm:text-lg font-extrabold ${v.color}">${v.text}</p>`)
+                    .join('');
+                stanzaHTML = `
+                    <div id="verses-${pageData.pageNum}" class="${pageData.boxBg} border-2 border-dashed rounded-2xl p-2.5 sm:p-3 my-1">
+                        ${linesHTML}
+                    </div>
+                `;
+            }
+
+            const cornerButtonHTML = isLeftPage
+                ? `<button onclick="flipPrev()" class="corner-curl corner-left" title="Página anterior">◀</button>`
+                : `<button onclick="flipNext()" class="corner-curl corner-right" title="Siguiente página">▶</button>`;
+
+            const footerHTML = isLeftPage
+                ? `<div class="flex justify-between items-center text-xs text-stone-500 font-bold pt-0.5 pl-11">
+                       <span>◀ Anterior</span>
+                       <span class="bg-amber-100 text-amber-900 px-2.5 py-0.5 rounded-full">Pág. ${pageData.pageNum}</span>
+                   </div>`
+                : `<div class="flex justify-between items-center text-xs text-stone-500 font-bold pt-0.5 pr-11">
+                       <span class="bg-amber-100 text-amber-900 px-2.5 py-0.5 rounded-full">Pág. ${pageData.pageNum}</span>
+                       <span>Siguiente ▶</span>
+                   </div>`;
+
+            face.innerHTML = `
+                <div class="flex items-center justify-between text-xs font-extrabold">
+                    <span class="${pageData.badgeBg} px-3 py-1 rounded-full shadow-xs">${pageData.badge}</span>
+                    <span class="text-purple-700 hidden sm:inline">Nuestros Cuentos</span>
+                </div>
+
+                <div class="w-full h-44 sm:h-52 my-1.5 vivid-canvas-frame relative overflow-hidden">
+                    <canvas id="${pageData.canvasId}" class="w-full h-full cursor-pointer"></canvas>
+                    <span class="absolute bottom-1.5 left-1/2 -translate-x-1/2 text-[11px] bg-white/90 text-purple-900 px-2.5 py-0.5 rounded-full font-bold shadow-xs pointer-events-none whitespace-nowrap">
+                        ${pageData.hint}
+                    </span>
+                </div>
+
+                ${stanzaHTML}
+                ${footerHTML}
+                ${cornerButtonHTML}
+            `;
+
+            return face;
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.remove('opacity-0');
+            toast.classList.add('opacity-100');
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0');
+            }, 3200);
+        }
+
+        /* ==========================================================================
+           SONIDO SINTETIZADO DE PASO DE PÁGINA (WEB AUDIO API)
+           ========================================================================== */
+        let audioCtx = null;
+        function playPageFlipSound() {
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                const duration = 0.28;
+                const bufferSize = audioCtx.sampleRate * duration;
+                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    const t = i / bufferSize;
+                    data[i] = (Math.random() * 2 - 1) * Math.sin(t * Math.PI) * Math.pow(1 - t, 0.55) * 0.32;
+                }
+                const noise = audioCtx.createBufferSource();
+                noise.buffer = buffer;
+
+                const filter = audioCtx.createBiquadFilter();
+                filter.type = 'bandpass';
+                filter.frequency.setValueAtTime(950, audioCtx.currentTime);
+                filter.frequency.exponentialRampToValueAtTime(2500, audioCtx.currentTime + duration);
+                filter.Q.value = 1.3;
+
+                noise.connect(filter);
+                filter.connect(audioCtx.destination);
+                noise.start();
+            } catch (e) {}
+        }
+
+        /* ==========================================================================
+           CONTROL DE ANIMACIÓN 3D DE HOJAS Y Z-INDEX DINÁMICO
+           ========================================================================== */
+        function updateBook3D() {
+            const wrapper = document.getElementById('bookWrapper');
+            const totalLeaves = 10;
+
+            wrapper.classList.remove('closed-front', 'closed-back');
+            if (currentState === 0) wrapper.classList.add('closed-front');
+            if (currentState === maxState) wrapper.classList.add('closed-back');
+
+            for (let i = 0; i < totalLeaves; i++) {
+                const leaf = document.getElementById(`leaf-${i}`);
+                const isFlipped = i < currentState;
+                leaf.classList.toggle('flipped', isFlipped);
+
+                if (isFlipped) {
+                    leaf.style.zIndex = 10 + i;
+                } else {
+                    leaf.style.zIndex = 20 + (totalLeaves - i);
+                }
+            }
+
+            const btnPrev = document.getElementById('btnPrev');
+            const btnNext = document.getElementById('btnNext');
+            btnPrev.disabled = currentState === 0;
+
+            if (currentState === 0) {
+                btnNext.innerHTML = '<span>Abrir Libro ➡️</span>';
+            } else if (currentState === maxState) {
+                btnNext.innerHTML = '<span>Inicio 🔄</span>';
+            } else {
+                btnNext.innerHTML = '<span>Siguiente ➡️</span>';
+            }
+
+            document.getElementById('pageIndicatorLabel').textContent = spreadStates[currentState].label;
+
+            const dots = document.getElementById('stepDots').children;
+            for (let i = 0; i < dots.length; i++) {
+                dots[i].className = i === currentState
+                    ? 'w-3.5 h-3.5 rounded-full bg-pink-600 scale-125 cursor-pointer transition-all'
+                    : 'w-2.5 h-2.5 rounded-full bg-stone-300 hover:bg-pink-300 cursor-pointer transition-all';
+            }
+
+            setTimeout(resizeAllCanvases, 140);
+        }
+
+        function flipNext() {
+            stopSpeech();
+            playPageFlipSound();
+            if (currentState < maxState) {
+                currentState++;
+            } else {
+                currentState = 0;
+            }
+            updateBook3D();
+            // Si llega a la página del video musical, no auto-narrar encima del video
+            if (isAutoRead && !spreadStates[currentState].isVideoPage) {
+                setTimeout(() => startNarrationForState(currentState), 850);
+            } else if (spreadStates[currentState].isVideoPage && isAutoRead) {
+                isAutoRead = false;
+                updateAutoReadButton();
+                showToast("🎵 ¡Llegamos a la canción! Dale Play al video.");
+            }
+        }
+
+        function flipPrev() {
+            stopSpeech();
+            if (currentState > 0) {
+                playPageFlipSound();
+                currentState--;
+                updateBook3D();
+                if (isAutoRead && !spreadStates[currentState].isVideoPage) {
+                    setTimeout(() => startNarrationForState(currentState), 850);
+                }
+            }
+        }
+
+        function goToState(targetState) {
+            if (targetState < 0 || targetState > maxState) return;
+            stopSpeech();
+            if (targetState !== currentState) {
+                playPageFlipSound();
+                currentState = targetState;
+                updateBook3D();
+            }
+            if (isAutoRead && !spreadStates[currentState].isVideoPage) {
+                setTimeout(() => startNarrationForState(currentState), 850);
+            } else if (spreadStates[currentState].isVideoPage) {
+                isAutoRead = false;
+                updateAutoReadButton();
+            }
+        }
+
+        // Navegación con flechas del teclado
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') flipNext();
+            if (e.key === 'ArrowLeft') flipPrev();
+        });
+
+        /* ==========================================================================
+           NARRACIÓN POR VOZ EN ESPAÑOL CON RESALTADO DE VERSOS Y MODO AUTOMÁTICO
+           ========================================================================== */
+        function clearVerseHighlights() {
+            document.querySelectorAll('.verse-line').forEach(el => el.classList.remove('verse-active'));
+            if (highlightTimer) {
+                clearInterval(highlightTimer);
+                highlightTimer = null;
+            }
+        }
+
+        function stopSpeech() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+            isSpeaking = false;
+            clearVerseHighlights();
+            const btn = document.getElementById('btnSpeak');
+            btn.innerHTML = '<span>🔊 Escuchar página</span>';
+            btn.classList.remove('bg-rose-600', 'text-white');
+            btn.classList.add('bg-yellow-400', 'text-amber-950');
+        }
+
+        function toggleSpeakCurrent() {
+            if (isSpeaking) {
+                isAutoRead = false;
+                updateAutoReadButton();
+                stopSpeech();
+            } else {
+                startNarrationForState(currentState);
+            }
+        }
+
+        function toggleAutoRead() {
+            isAutoRead = !isAutoRead;
+            updateAutoReadButton();
+            if (isAutoRead) {
+                showToast("🪄 Auto-lectura activada");
+                if (!isSpeaking) {
+                    startNarrationForState(currentState);
+                }
+            } else {
+                showToast("Auto-lectura desactivada");
+                stopSpeech();
+            }
+        }
+
+        function updateAutoReadButton() {
+            const btn = document.getElementById('btnAutoRead');
+            const text = document.getElementById('autoReadText');
+            const icon = document.getElementById('autoReadIcon');
+            if (isAutoRead) {
+                btn.className = "btn-toy bg-purple-600 text-white border-2 border-purple-800 font-bold px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-2xl text-xs sm:text-sm flex items-center gap-1.5 cursor-pointer";
+                text.textContent = "Auto-lectura: ON";
+                icon.textContent = "🪄";
+            } else {
+                btn.className = "btn-toy bg-purple-100 hover:bg-purple-200 text-purple-900 border-2 border-purple-400 font-bold px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-2xl text-xs sm:text-sm flex items-center gap-1.5 cursor-pointer";
+                text.textContent = "Auto-lectura: OFF";
+                icon.textContent = "✨";
+            }
+        }
+
+        function startNarrationForState(stateIdx) {
+            if (!('speechSynthesis' in window)) {
+                showToast("Tu navegador no soporta voz en español.");
+                return;
+            }
+            window.speechSynthesis.cancel();
+            clearVerseHighlights();
+
+            const script = spreadStates[stateIdx];
+            const fullText = script.speechLines.join(" ");
+            const utterance = new SpeechSynthesisUtterance(fullText);
+            utterance.lang = 'es-ES';
+            utterance.rate = 0.90;
+            utterance.pitch = 1.12;
+
+            let verseEls = [];
+            script.verseContainerIds.forEach(id => {
+                const container = document.getElementById(id);
+                if (container) {
+                    verseEls.push(...container.querySelectorAll('.verse-line'));
+                }
+            });
+
+            isSpeaking = true;
+            const btn = document.getElementById('btnSpeak');
+            btn.innerHTML = '<span>⏹️ Detener voz</span>';
+            btn.classList.remove('bg-yellow-400', 'text-amber-950');
+            btn.classList.add('bg-rose-600', 'text-white');
+
+            if (verseEls.length > 0) {
+                let lineIdx = 0;
+                verseEls[0].classList.add('verse-active');
+                const stepTime = Math.max(1400, (fullText.length * 64) / verseEls.length);
+                highlightTimer = setInterval(() => {
+                    verseEls.forEach(el => el.classList.remove('verse-active'));
+                    lineIdx++;
+                    if (lineIdx < verseEls.length) {
+                        verseEls[lineIdx].classList.add('verse-active');
+                    } else {
+                        clearInterval(highlightTimer);
+                    }
+                }, stepTime);
+            }
+
+            utterance.onend = () => {
+                stopSpeech();
+                if (isAutoRead && currentState < maxState) {
+                    setTimeout(() => {
+                        if (isAutoRead) flipNext();
+                    }, 850);
+                } else if (isAutoRead && currentState === maxState) {
+                    isAutoRead = false;
+                    updateAutoReadButton();
+                    showToast("🎉 ¡Hemos terminado todos los cuentos!");
+                }
+            };
+
+            utterance.onerror = () => stopSpeech();
+            window.speechSynthesis.speak(utterance);
+        }
+
+        /* ==========================================================================
+           DESCARGA DIRECTA DEL LIBRO INTERACTIVO EN UN SOLO ARCHIVO HTML
+           ========================================================================== */
+        function downloadBook() {
+            try {
+                stopSpeech();
+                isAutoRead = false;
+                updateAutoReadButton();
+                const savedState = currentState;
+                currentState = 0;
+                updateBook3D();
+
+                const wrapper = document.getElementById('bookWrapper');
+                const leaves = wrapper.querySelectorAll('.leaf');
+                leaves.forEach(l => l.remove());
+                document.getElementById('stepDots').innerHTML = '';
+
+                const htmlContent = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+
+                buildBookDOM();
+                setupCanvasRegistry();
+                currentState = savedState;
+                updateBook3D();
+
+                const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = "Nuestros_Cuentos_Magicos_Con_Cancion.html";
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                showToast("📥 ¡Libro descargado! Ábrelo cuando quieras 🌈🎵");
+            } catch (err) {
+                showToast("Usa Ctrl+S (o Cmd+S) para guardar el libro en tu computadora.");
+            }
+        }
+
+        /* ==========================================================================
+           MOTOR DE ILUSTRACIONES ANIMADAS VIBRANTES (HTML5 CANVAS)
+           ========================================================================== */
+        const VIVID_PALETTE = ['#ff007f', '#00bbf9', '#ffe600', '#ff8c00', '#00f5d4', '#9b5de5', '#06d6a0'];
+
+        class MagicBurstParticle {
+            constructor(x, y, kind) {
+                this.x = x;
+                this.y = y;
+                this.vx = (Math.random() - 0.5) * 5.2;
+                this.vy = -1.2 - Math.random() * 3.8;
+                this.alpha = 1;
+                this.size = 6 + Math.random() * 7;
+                this.kind = kind;
+                this.color = VIVID_PALETTE[Math.floor(Math.random() * VIVID_PALETTE.length)];
+                this.label = ['1', '2', '3', '+', '♪', '♫', '★'][Math.floor(Math.random() * 7)];
+                this.rot = Math.random() * Math.PI * 2;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.rot += 0.08;
+                this.alpha -= 0.02;
+            }
+            draw(ctx) {
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, this.alpha);
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rot);
+                ctx.fillStyle = this.color;
+
+                if (this.kind === 'heart') {
+                    const s = this.size * 0.8;
+                    ctx.beginPath();
+                    ctx.moveTo(0, s * 0.4);
+                    ctx.bezierCurveTo(-s, -s * 0.4, -s * 0.5, -s * 1.2, 0, -s * 0.4);
+                    ctx.bezierCurveTo(s * 0.5, -s * 1.2, s, -s * 0.4, 0, s * 0.4);
+                    ctx.fill();
+                } else if (this.kind === 'number' || this.kind === 'note') {
+                    ctx.font = `bold ${Math.round(this.size * 2)}px Fredoka, sans-serif`;
+                    ctx.textAlign = 'center';
+                    ctx.fillText(this.label, 0, 0);
+                } else {
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.size * 0.6, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+        }
+
+        function drawHappyKid(ctx, x, y, scale, shirtColor, hairColor, isGirl = false, jumpPhase = 0) {
+            const bounce = Math.abs(Math.sin(jumpPhase)) * -12;
+            ctx.save();
+            ctx.translate(x, y + bounce);
+            ctx.scale(scale, scale);
+            ctx.strokeStyle = "#3d1e24";
+            ctx.lineWidth = 2.6;
+            ctx.lineCap = "round";
+            ctx.lineJoin = "round";
+
+            ctx.beginPath();
+            ctx.moveTo(-7, 22);
+            ctx.lineTo(-9, 38);
+            ctx.moveTo(7, 22);
+            ctx.lineTo(9, 38);
+            ctx.stroke();
+
+            const wave = Math.sin(jumpPhase * 2) * 0.25;
+            ctx.beginPath();
+            ctx.moveTo(-12, 6);
+            ctx.quadraticCurveTo(-24, -4 + wave * 15, -22, -14);
+            ctx.moveTo(12, 6);
+            ctx.quadraticCurveTo(24, -4 - wave * 15, 22, -14);
+            ctx.stroke();
+
+            ctx.fillStyle = shirtColor;
+            ctx.beginPath();
+            if (isGirl) {
+                ctx.moveTo(-10, 0);
+                ctx.lineTo(10, 0);
+                ctx.lineTo(18, 24);
+                ctx.lineTo(-18, 24);
+            } else {
+                ctx.roundRect(-12, 0, 24, 24, 6);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            if (isGirl) {
+                ctx.fillStyle = hairColor;
+                ctx.beginPath();
+                ctx.arc(-15, -18, 7, 0, Math.PI * 2);
+                ctx.arc(15, -18, 7, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+            }
+
+            ctx.fillStyle = "#ffedd5";
+            ctx.beginPath();
+            ctx.arc(0, -15, 14, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = hairColor;
+            ctx.beginPath();
+            ctx.arc(0, -18, 14, Math.PI, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = "#2b191d";
+            ctx.beginPath();
+            ctx.arc(-4.5, -15, 2, 0, Math.PI * 2);
+            ctx.arc(4.5, -15, 2, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = "#ff4d6d";
+            ctx.beginPath();
+            ctx.arc(-8, -11, 2.5, 0, Math.PI * 2);
+            ctx.arc(8, -11, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(0, -11, 5, 0.15 * Math.PI, 0.85 * Math.PI);
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        function drawVividButterfly(ctx, x, y, scale, topColor, botColor, t, dance = false) {
+            const by = y + (dance ? Math.abs(Math.sin(t * 2)) * -15 : Math.cos(t * 1.4) * 10);
+            const bx = x + Math.sin(t) * 18;
+            const flap = 0.76 + Math.sin(t * 6) * 0.24;
+
+            ctx.save();
+            ctx.translate(bx, by);
+            if (dance) ctx.rotate(Math.sin(t * 2) * 0.2);
+            ctx.scale(scale, scale);
+            ctx.strokeStyle = "#3d1e24";
+            ctx.lineWidth = 2.6;
+            ctx.lineCap = "round";
+
+            ctx.save();
+            ctx.scale(flap, 1);
+            ctx.fillStyle = topColor;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.bezierCurveTo(-38, -34, -52, 8, -18, 20);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = botColor;
+            ctx.beginPath();
+            ctx.moveTo(0, 5);
+            ctx.bezierCurveTo(-30, 15, -38, 42, -10, 32);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            ctx.restore();
+
+            ctx.save();
+            ctx.scale(flap, 1);
+            ctx.fillStyle = topColor;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.bezierCurveTo(38, -34, 52, 8, 18, 20);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = botColor;
+            ctx.beginPath();
+            ctx.moveTo(0, 5);
+            ctx.bezierCurveTo(30, 15, 38, 42, 10, 32);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            ctx.restore();
+
+            ctx.fillStyle = "#ff9e00";
+            ctx.beginPath();
+            ctx.ellipse(0, 11, 6, 20, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = "#ffe5d9";
+            ctx.beginPath();
+            ctx.arc(0, -12, 10.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = "#2b191d";
+            ctx.beginPath();
+            ctx.arc(-3.5, -14, 1.9, 0, Math.PI * 2);
+            ctx.arc(3.5, -14, 1.9, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(0, -10, 4.2, 0.15 * Math.PI, 0.85 * Math.PI);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(-3, -22);
+            ctx.bezierCurveTo(-10, -35, -18, -30, -11, -24);
+            ctx.moveTo(3, -22);
+            ctx.bezierCurveTo(10, -35, 18, -30, 11, -24);
+            ctx.stroke();
+
+            ctx.restore();
+        }
+
+        function drawVividFlower(ctx, x, y, color, t) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.strokeStyle = "#2b4c2c";
+            ctx.lineWidth = 2.4;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.quadraticCurveTo(5, 18, 0, 36);
+            ctx.stroke();
+
+            ctx.rotate(Math.sin(t * 1.5 + x) * 0.09);
+            for (let i = 0; i < 8; i++) {
+                ctx.save();
+                ctx.rotate((i * Math.PI) / 4);
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.ellipse(0, -12, 6, 10, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                ctx.restore();
+            }
+            ctx.fillStyle = "#ffe600";
+            ctx.beginPath();
+            ctx.arc(0, 0, 7, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        let canvasRegistry = [];
+
+        function setupCanvasRegistry() {
+            canvasRegistry = [];
+            const allConfigs = [
+                { id: 'canvas-cover', type: 'cover', sparkles: [] },
+                { id: 'canvas-song', type: 'song_party', sparkles: [] },
+                ...interiorPages.map(p => ({ id: p.canvasId, type: p.sceneType, sparkles: [] }))
+            ];
+
+            allConfigs.forEach(cfg => {
+                const el = document.getElementById(cfg.id);
+                if (!el) return;
+                const burst = (e) => {
+                    e.stopPropagation();
+                    const rect = el.getBoundingClientRect();
+                    const cx = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+                    const cy = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+                    let kind = 'star';
+                    if (cfg.type.includes('love') || cfg.type.includes('dad') || cfg.type.includes('author')) kind = 'heart';
+                    if (cfg.type.includes('dylan')) kind = 'number';
+                    if (cfg.type === 'song_party') kind = 'note';
+                    for (let i = 0; i < 16; i++) {
+                        cfg.sparkles.push(new MagicBurstParticle(cx, cy, i % 2 === 0 ? kind : 'star'));
+                    }
+                };
+                el.addEventListener('click', burst);
+                el.addEventListener('touchstart', burst, { passive: true });
+                canvasRegistry.push(cfg);
+            });
+        }
+
+        function resizeAllCanvases() {
+            const dpr = window.devicePixelRatio || 1;
+            canvasRegistry.forEach(cfg => {
+                const el = document.getElementById(cfg.id);
+                if (!el) return;
+                const rect = el.getBoundingClientRect();
+                if (rect.width > 0 && rect.height > 0) {
+                    el.width = rect.width * dpr;
+                    el.height = rect.height * dpr;
+                    const ctx = el.getContext('2d');
+                    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                }
+            });
+        }
+
+        let animTime = 0;
+        function renderAllAnimations() {
+            animTime += 0.025;
+
+            canvasRegistry.forEach(cfg => {
+                const el = document.getElementById(cfg.id);
+                if (!el) return;
+                const w = el.clientWidth;
+                const h = el.clientHeight;
+                if (w === 0 || h === 0) return;
+
+                const ctx = el.getContext('2d');
+                ctx.clearRect(0, 0, w, h);
+
+                // Sol radiante amarillo brillante
+                ctx.save();
+                ctx.fillStyle = "#ffe600";
+                ctx.strokeStyle = "#ff8c00";
+                ctx.lineWidth = 2.5;
+                ctx.beginPath();
+                ctx.arc(34, 32, 17, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                ctx.restore();
+
+                // Suelo verde esmeralda vivo
+                ctx.fillStyle = "#06d6a0";
+                ctx.beginPath();
+                ctx.moveTo(0, h - 18);
+                ctx.quadraticCurveTo(w / 2, h - 28, w, h - 18);
+                ctx.lineTo(w, h);
+                ctx.lineTo(0, h);
+                ctx.closePath();
+                ctx.fill();
+
+                const t = animTime;
+
+                // ESCENA PORTADA O FIESTA MUSICAL ("MI HISTORIA HECHA CANCIÓN")
+                if (cfg.type === 'cover' || cfg.type === 'song_party') {
+                    drawVividButterfly(ctx, w * 0.22, h * 0.32, 0.85, "#ff007f", "#ffe600", t, true);
+                    drawVividButterfly(ctx, w * 0.78, h * 0.30, 0.82, "#00bbf9", "#ff8c00", t + 1.5, true);
+                    drawHappyKid(ctx, w * 0.28, h * 0.68, 0.80, "#00bbf9", "#3d1e24", false, t * 2.4);
+                    drawHappyKid(ctx, w * 0.44, h * 0.68, 0.80, "#06d6a0", "#5c3a21", false, t * 2.4 + 1);
+                    drawHappyKid(ctx, w * 0.60, h * 0.68, 0.80, "#ff007f", "#3d1e24", true, t * 2.4 + 2);
+                    drawHappyKid(ctx, w * 0.76, h * 0.68, 0.80, "#9b5de5", "#3d1e24", true, t * 2.4 + 3);
+
+                    if (cfg.type === 'song_party') {
+                        ctx.save();
+                        ctx.font = "bold 22px Fredoka, sans-serif";
+                        ctx.fillStyle = "#ff007f";
+                        ctx.fillText("♪", w * 0.36, h * 0.25 + Math.sin(t * 3) * 8);
+                        ctx.fillStyle = "#9b5de5";
+                        ctx.fillText("♫", w * 0.54, h * 0.22 + Math.cos(t * 3) * 8);
+                        ctx.fillStyle = "#ff8c00";
+                        ctx.fillText("♩", w * 0.66, h * 0.28 + Math.sin(t * 3 + 1) * 8);
+                        ctx.restore();
+                    }
+                }
+
+                // CUENTO 1: ISA MARIPOSITA
+                else if (cfg.type.startsWith('isa_')) {
+                    const isDance = cfg.type === 'isa_dance' || cfg.type === 'isa_author';
+                    drawVividFlower(ctx, w * 0.16, h - 38, "#ff007f", t);
+                    drawVividFlower(ctx, w * 0.42, h - 38, "#9b5de5", t + 1);
+                    drawVividFlower(ctx, w * 0.68, h - 38, "#ff8c00", t + 2);
+                    drawVividFlower(ctx, w * 0.86, h - 38, "#00bbf9", t + 3);
+
+                    drawVividButterfly(ctx, w * 0.50, h * 0.36, 1.05, "#ff007f", "#ffe600", t, isDance);
+                    drawVividButterfly(ctx, w * 0.22, h * 0.44, 0.72, "#00bbf9", "#e0aaff", t + 1.4, isDance);
+                    drawVividButterfly(ctx, w * 0.78, h * 0.33, 0.75, "#ff8c00", "#ff9ebb", t + 2.7, isDance);
+                }
+
+                // CUENTO 2: DYLAN EL PARLANCHÍN
+                else if (cfg.type.startsWith('dylan_')) {
+                    ctx.save();
+                    ctx.fillStyle = "#0077b6";
+                    ctx.strokeStyle = "#ff9e00";
+                    ctx.lineWidth = 4;
+                    ctx.beginPath();
+                    ctx.roundRect(w * 0.56, h * 0.16, w * 0.36, h * 0.44, 12);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.fillStyle = "#ffe600";
+                    ctx.font = "bold 16px Fredoka, sans-serif";
+                    ctx.fillText("2 x 3 = 6", w * 0.61, h * 0.34);
+                    ctx.fillStyle = "#ffffff";
+                    ctx.fillText("A B C  ♪ ♫", w * 0.61, h * 0.50);
+                    ctx.restore();
+
+                    ctx.save();
+                    ctx.font = "bold 20px Fredoka, sans-serif";
+                    ctx.fillStyle = "#ff007f";
+                    ctx.fillText("♪", w * 0.18, h * 0.30 + Math.sin(t * 2) * 8);
+                    ctx.fillStyle = "#ff8c00";
+                    ctx.fillText("1 + 2 = 3", w * 0.25, h * 0.22 + Math.cos(t * 2) * 7);
+                    ctx.restore();
+
+                    drawHappyKid(ctx, w * 0.34, h * 0.66, 0.98, "#00bbf9", "#2b191d", false, t * 2.2);
+                    if (cfg.type === 'dylan_love' || cfg.type === 'dylan_author') {
+                        drawHappyKid(ctx, w * 0.68, h * 0.66, 1.05, "#ff007f", "#4a2511", true, t * 1.5);
+                    }
+                }
+
+                // CUENTO 3: EN MI ESCUELA
+                else if (cfg.type.startsWith('school_')) {
+                    const rainbowColors = ['#ff007f', '#ff8c00', '#ffe600', '#06d6a0', '#00bbf9'];
+                    rainbowColors.forEach((col, idx) => {
+                        ctx.save();
+                        ctx.strokeStyle = col;
+                        ctx.lineWidth = 5;
+                        ctx.beginPath();
+                        ctx.arc(w * 0.5, h * 0.62, 85 - idx * 6, Math.PI, Math.PI * 2);
+                        ctx.stroke();
+                        ctx.restore();
+                    });
+
+                    ctx.save();
+                    ctx.fillStyle = "#ffe600";
+                    ctx.strokeStyle = "#3d1e24";
+                    ctx.lineWidth = 2.5;
+                    ctx.fillRect(w * 0.72, h * 0.36, 56, 44);
+                    ctx.strokeRect(w * 0.72, h * 0.36, 56, 44);
+
+                    ctx.fillStyle = "#ff007f";
+                    ctx.beginPath();
+                    ctx.moveTo(w * 0.70, h * 0.36);
+                    ctx.lineTo(w * 0.72 + 28, h * 0.18);
+                    ctx.lineTo(w * 0.74 + 56, h * 0.36);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.restore();
+
+                    drawHappyKid(ctx, w * 0.22, h * 0.67, 0.88, "#06d6a0", "#2b191d", false, t * 2.5);
+                    drawHappyKid(ctx, w * 0.40, h * 0.67, 0.88, "#ff8c00", "#4a2511", false, t * 2.5 + 1);
+                    drawHappyKid(ctx, w * 0.58, h * 0.67, 0.88, "#00bbf9", "#2b191d", false, t * 2.5 + 2);
+                }
+
+                // CUENTO 4: JULIETA Y SU CASTILLO REAL
+                else if (cfg.type.startsWith('castle_')) {
+                    ctx.save();
+                    ctx.strokeStyle = "#4a154b";
+                    ctx.lineWidth = 2.5;
+
+                    ctx.fillStyle = "#ffd166";
+                    ctx.fillRect(w * 0.56, h * 0.28, 54, 62);
+                    ctx.strokeRect(w * 0.56, h * 0.28, 54, 62);
+
+                    ctx.fillStyle = "#ff007f";
+                    ctx.beginPath();
+                    ctx.moveTo(w * 0.54, h * 0.28);
+                    ctx.lineTo(w * 0.56 + 27, h * 0.10);
+                    ctx.lineTo(w * 0.58 + 54, h * 0.28);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+
+                    ctx.fillStyle = "#ff9ebb";
+                    ctx.fillRect(w * 0.44, h * 0.40, 26, 50);
+                    ctx.strokeRect(w * 0.44, h * 0.40, 26, 50);
+                    ctx.fillRect(w * 0.76, h * 0.40, 26, 50);
+                    ctx.strokeRect(w * 0.76, h * 0.40, 26, 50);
+
+                    ctx.fillStyle = "#9b5de5";
+                    ctx.beginPath();
+                    ctx.arc(w * 0.56 + 27, h * 0.90 - 16, 12, Math.PI, 0);
+                    ctx.lineTo(w * 0.56 + 39, h * 0.90);
+                    ctx.lineTo(w * 0.56 + 15, h * 0.90);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.restore();
+
+                    drawHappyKid(ctx, w * 0.26, h * 0.67, 0.95, "#ff007f", "#3d1e24", true, t * 2);
+                    if (cfg.type === 'castle_family' || cfg.type === 'castle_dad' || cfg.type === 'castle_author') {
+                        drawHappyKid(ctx, w * 0.12, h * 0.68, 0.82, "#00bbf9", "#3d1e24", false, t * 2 + 1.2);
+                    }
+                }
+
+                // Destellos automáticos suaves en portadas, canción y páginas de autor
+                if ((cfg.type === 'cover' || cfg.type === 'song_party' || cfg.type.endsWith('_author')) && Math.random() < 0.14) {
+                    const pKind = cfg.type === 'song_party' ? 'note' : (Math.random() > 0.5 ? 'heart' : 'star');
+                    cfg.sparkles.push(new MagicBurstParticle(Math.random() * w, Math.random() * (h * 0.65), pKind));
+                }
+
+                // Actualizar y dibujar explosiones de partículas
+                for (let i = cfg.sparkles.length - 1; i >= 0; i--) {
+                    cfg.sparkles[i].update();
+                    cfg.sparkles[i].draw(ctx);
+                    if (cfg.sparkles[i].alpha <= 0) {
+                        cfg.sparkles.splice(i, 1);
+                    }
+                }
+            });
+
+            requestAnimationFrame(renderAllAnimations);
+        }
+
+        window.addEventListener('resize', resizeAllCanvases);
+        window.addEventListener('load', () => {
+            buildBookDOM();
+            setupCanvasRegistry();
+            updateBook3D();
+            resizeAllCanvases();
+            requestAnimationFrame(renderAllAnimations);
+        });
+    </script>
+</body>
+</html>
